@@ -1,2 +1,2 @@
 # signal-flow-server
-This repo cointains code for Signal Flow server
+This repo contains code for Signal Flow server

@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalFlow | Consentium IoT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .canvas-bg {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .node-card { position: absolute; user-select: none; }
+        .hidden-panel { display: none !important; }
+        .drag-over { background-color: #f1f5f9; border: 2px dashed #cbd5e1; }
+
+        .connection-handle {
+            transition: transform 0.1s ease-in-out, background-color 0.1s;
+        }
+        .connection-handle:hover {
+            transform: scale(1.5);
+            cursor: crosshair;
+            background-color: #6366f1;
+            border-color: #6366f1;
+        }
+        .handle-out { z-index: 20; }
+        .handle-in { z-index: 20; }
+
+        .wire-path {
+            pointer-events: stroke;
+            cursor: pointer;
+            transition: stroke-width 0.2s ease, stroke 0.2s ease;
+        }
+        .wire-path:hover {
+            stroke-width: 4px;
+            stroke: #ef4444 !important;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex font-sans text-slate-800 bg-[#f8f9fc]">
+
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-sm">
+        <div class="h-16 flex items-center px-6 border-b border-slate-100">
+            <div class="flex items-center gap-2 text-indigo-700 font-bold text-lg">
+                <svg class="w-6 h-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Consentium IoT
+            </div>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+            <div>
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Monitor</div>
+                <div class="space-y-1">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> Home
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> My Dashboards
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors mt-2 font-medium border-l-2 border-indigo-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> SignalFlow
+                    </a>
+                </div>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Build & Automate</div>
+                <div class="space-y-1">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Create Dashboard
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0">
+
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10">
+            <div class="flex items-center text-sm text-slate-500">
+                Home <span class="mx-2">/</span> <span class="text-slate-800 font-medium">SignalFlow</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200 text-indigo-600 bg-indigo-50 uppercase tracking-wide">Pro</span>
+                <div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold shrink-0">DC</div>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden relative">
+
+            <div id="canvas" class="flex-1 canvas-bg relative overflow-hidden transition-colors duration-200">
+
+                <div class="absolute top-4 left-4 z-10 flex gap-2 items-center">
+                    <button class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                        Run Flow
+                    </button>
+                    <button onclick="exportPipeline()" id="deploy-btn" class="px-3 py-1.5 bg-indigo-600 shadow-sm rounded-md text-sm font-medium text-white hover:bg-indigo-700">Deploy</button>
+                    <button class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-1 ml-4" onclick="clearCanvas(event)">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg Clear
+                    </button>
+                </div>
+
+                <svg class="absolute top-0 left-0 w-full h-full pointer-events-none z-0" id="svg-layer"></svg>
+
+                <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
+                    <svg class="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <h2 class="text-lg font-medium text-slate-500">Workspace is empty</h2>
+                    <p class="text-sm mt-1">Drag and drop blocks from the library to build your pipeline.</p>
+                </div>
+
+                <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 px-4 py-2 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm rounded-full pointer-events-none hidden md:block">
+                    <span class="text-xs text-slate-500"><span class="font-bold text-slate-700">Tip:</span> Double-click a wire to delete it.</span>
+                </div>
+
+                <button id="saved-graphs-toggle" onclick="toggleSavedGraphs(event)" class="absolute bottom-6 right-6 z-30 px-4 py-2 bg-white border border-slate-200 shadow-md rounded-full text-sm font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Stored Graphs (<span id="saved-graph-count">0</span>)
+                </button>
+
+                <div id="saved-graphs-panel" class="absolute bottom-0 left-0 w-full bg-white border-t border-slate-200 transition-transform duration-300 transform translate-y-full z-40 flex flex-col shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]" style="height: 280px;" onclick="event.stopPropagation()">
+                    <div class="h-10 flex items-center justify-between px-4 border-b border-slate-100 bg-slate-50 shrink-0">
+                        <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                            Stored Visualizations
+                        </div>
+                        <button onclick="toggleSavedGraphs(event)" class="text-slate-400 hover:text-slate-600 p-1">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <div id="saved-graphs-container" class="flex-1 overflow-x-auto p-4 flex gap-4 bg-slate-50/50 items-center">
+                        </div>
+                </div>
+            </div>
+
+            <aside class="w-80 bg-white border-l border-slate-200 flex flex-col shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.02)] z-20 shrink-0">
+
+                <div id="panel-library" class="flex flex-col h-full">
+                    <div class="h-14 flex items-center px-4 border-b border-slate-200 bg-slate-50">
+                        <div class="text-sm font-semibold text-slate-800">Available Blocks</div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Data Sources</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div draggable="true" ondragstart="handleDragStart(event, 'telemetry')" class="border border-slate-200 rounded-md p-2 hover:border-blue-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-blue-50 text-blue-600 flex items-center justify-center"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                                    <span class="text-[11px] font-medium text-slate-700">Telemetry</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Analytics & EdgeNeuron AI</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div draggable="true" ondragstart="handleDragStart(event, 'gemini')" class="border border-slate-200 rounded-md p-2 hover:border-indigo-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                                    </div>
+                                    <span class="text-[11px] font-medium text-slate-700">Gemini LLM</span>
+                                </div>
+                                <div draggable="true" ondragstart="handleDragStart(event, 'movingaverage')" class="border border-slate-200 rounded-md p-2 hover:border-cyan-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-cyan-50 text-cyan-600 flex items-center justify-center">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                                    </div>
+                                    <span class="text-[11px] font-medium text-slate-700">Moving Avg</span>
+                                </div>
+                                <div draggable="true" ondragstart="handleDragStart(event, 'zscore')" class="border border-slate-200 rounded-md p-2 hover:border-purple-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-purple-50 text-purple-600 flex items-center justify-center"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div>
+                                    <span class="text-[11px] font-medium text-slate-700">Z-Score</span>
+                                </div>
+                                <div draggable="true" ondragstart="handleDragStart(event, 'arima')" class="border border-slate-200 rounded-md p-2 hover:border-green-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-green-50 text-green-600 flex items-center justify-center"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg></div>
+                                    <span class="text-[11px] font-medium text-slate-700">ARIMA</span>
+                                </div>
+                                <div draggable="true" ondragstart="handleDragStart(event, 'kalman')" class="border border-slate-200 rounded-md p-2 hover:border-orange-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-orange-50 text-orange-600 flex items-center justify-center"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
+                                    <span class="text-[11px] font-medium text-slate-700">Kalman</span>
+                                </div>
+                                <div draggable="true" ondragstart="handleDragStart(event, 'holtwinters')" class="border border-slate-200 rounded-md p-2 hover:border-teal-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-teal-50 text-teal-600 flex items-center justify-center"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                                    <span class="text-[11px] font-medium text-slate-700">Holt-Winters</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Actions & Rules</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div draggable="true" ondragstart="handleDragStart(event, 'threshold')" class="border border-slate-200 rounded-md p-2 hover:border-amber-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-amber-50 text-amber-600 flex items-center justify-center">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                                    </div>
+                                    <span class="text-[11px] font-medium text-slate-700">Threshold</span>
+                                </div>
+                                <div draggable="true" ondragstart="handleDragStart(event, 'alert')" class="border border-slate-200 rounded-md p-2 hover:border-red-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-red-50 text-red-600 flex items-center justify-center"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
+                                    <span class="text-[11px] font-medium text-slate-700">Send Alert</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Outputs & Debug</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div draggable="true" ondragstart="handleDragStart(event, 'livechart')" class="border border-slate-200 rounded-md p-2 hover:border-pink-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all border-l-4 border-l-pink-400">
+                                    <div class="w-6 h-6 rounded bg-pink-50 text-pink-600 flex items-center justify-center">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-slate-700">Live Chart</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="panel-settings" class="hidden-panel flex flex-col h-full bg-white relative">
+                    <div class="h-14 flex items-center px-4 border-b border-slate-200 justify-between bg-indigo-50">
+                        <div class="text-sm font-semibold text-indigo-900">Block Parameters</div>
+                        <button onclick="showLibraryPanel()" class="text-indigo-400 hover:text-indigo-600 text-xs font-medium flex items-center gap-1 bg-white px-2 py-1 rounded border border-indigo-100 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg> Back
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-5" id="settings-content">
+                        </div>
+
+                    <div class="p-4 border-t border-slate-200 bg-slate-50">
+                        <button class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors" onclick="applySettings()">
+                            Apply Config
+                        </button>
+                    </div>
+                </div>
+
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // SYSTEM STATE & DOM ELEMENTS
+        // ==========================================
+        const canvas = document.getElementById('canvas');
+        const emptyState = document.getElementById('empty-state');
+        const svgLayer = document.getElementById('svg-layer');
+        let nodeIdCounter = 1;
+
+        let nodesData = [];
+        let connections = [];
+        let currentSelectedNodeId = null;
+
+        // Pre-populated saved graphs
+        let savedGraphsList = [
+            { id: 'graph-1', title: 'Motor Vibration (AI Filtered)', timestamp: '08:30 AM' },
+            { id: 'graph-2', title: 'Belt Speed Anomalies', timestamp: '09:15 AM' }
+        ];
+
+        let activeDragNode = null;
+        let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+
+        let isConnecting = false;
+        let tempLine = null;
+        let connectionStartHandle = null;
+
+        // Initialize UI
+        window.addEventListener('DOMContentLoaded', () => {
+            updateSavedGraphsUI();
+        });
+
+        // ==========================================
+        // 1. DRAG & DROP INSTANTIATION
+        // ==========================================
+        function handleDragStart(e, type) {
+            e.dataTransfer.setData('nodeType', type);
+        }
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            canvas.classList.add('drag-over');
+        });
+
+        canvas.addEventListener('dragleave', () => {
+            canvas.classList.remove('drag-over');
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvas.classList.remove('drag-over');
+
+            const type = e.dataTransfer.getData('nodeType');
+            if (!type) return;
+
+            emptyState.style.display = 'none';
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - 100;
+            const y = e.clientY - rect.top - 40;
+
+            instantiateNode(type, x, y);
+        });
+
+        // ==========================================
+        // 2. HTML NODE TEMPLATES
+        // ==========================================
+        const nodeTemplates = {
+            'telemetry': (id) => `
+                <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <button onclick="showSettingsPanel('${id}', 'telemetry', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </button>
+
+                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <div class="flex-1 min-w-0 pr-12">
+                            <h3 class="text-sm font-semibold text-slate-800 leading-tight truncate">Data Source</h3>
+                            <p class="text-[11px] text-slate-500">Device Telemetry</p>
+                        </div>
+                    </div>
+                    <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative">
+                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                    </div>
+                </div>`,
+
+            'gemini': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-indigo-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <button onclick="showSettingsPanel('${id}', 'gemini', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                        </div>
+                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Gemini Analysis</h3></div>
+                    </div>
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
+
+            'movingaverage': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-cyan-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <button onclick="showSettingsPanel('${id}', 'movingaverage', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-cyan-50 text-cyan-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        </div>
+                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Moving Avg</h3></div>
+                    </div>
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
+
+            'zscore': (id) => `
+                <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-purple-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <button onclick="showSettingsPanel('${id}', 'zscore', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-purple-50 text-purple-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-800 leading-tight">Z-Score Anomaly</h3>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-xs font-medium">
+                        <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
+                            <span class="text-red-500">True (Anomaly)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-red-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
+                        </div>
+                        <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
+                            <span class="text-slate-600">False (Normal)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
+                        </div>
+                    </div>
+                </div>`,
+
+            'threshold': (id) => `
+                <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-amber-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <button onclick="showSettingsPanel('${id}', 'threshold', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-800 leading-tight">Threshold</h3>
+                        </div>
+                    </div>
+                    <div class="flex flex-col text-xs font-medium">
+                        <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
+                            <span class="text-amber-600">True (Match)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-amber-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
+                        </div>
+                        <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
+                            <span class="text-slate-600">False (No Match)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
+                        </div>
+                    </div>
+                </div>`,
+
+            'arima': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <button onclick="showSettingsPanel('${id}', 'arima', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-green-50 text-green-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        </div>
+                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">ARIMA Forecast</h3></div>
+                    </div>
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
+
+            'kalman': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'kalman', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-orange-50 text-orange-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
+                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Kalman Filter</h3></div>
+                    </div>
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
+
+            'holtwinters': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-teal-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'holtwinters', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-teal-50 text-teal-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Holt-Winters</h3></div>
+                    </div>
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
+
+            'alert': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <button onclick="showSettingsPanel('${id}', 'alert', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-7 h-7 rounded bg-red-50 text-red-600 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Send Alert</h3></div>
+                    </div>
+                </div>`,
+
+            'livechart': (id) => `
+                <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-pink-500 cursor-move" style="z-index: 10;">
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                    <div class="flex justify-between items-center p-2 border-b border-slate-100">
+                        <div class="flex items-center gap-2 pointer-events-none">
+                            <div class="w-6 h-6 rounded bg-pink-50 text-pink-600 flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg>
+                            </div>
+                            <h3 class="text-xs font-semibold text-slate-800">Live Chart</h3>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="deleteNode('${id}', event)" class="text-slate-400 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                            <button onclick="showSettingsPanel('${id}', 'livechart', event)" class="text-slate-400 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="p-2 bg-slate-900 rounded-b-lg pointer-events-none">
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Stream Preview</span>
+                            <div class="flex gap-2">
+                                <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Raw</span>
+                                <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> AI Output</span>
+                            </div>
+                        </div>
+                        <svg viewBox="0 0 100 35" class="w-full h-20 overflow-visible">
+                            <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
+                            <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
+                            <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
+                            <polyline points="0,25 10,15 20,28 30,12 40,22 50,8 60,25 70,5 80,18 90,10 100,20" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
+                            <path d="M0,22 C15,18 25,20 35,16 C45,12 55,18 65,14 C75,10 85,15 100,12" fill="none" stroke="#ec4899" stroke-width="1.5" />
+                        </svg>
+                    </div>
+                </div>`
+        };
+
+        function instantiateNode(type, x, y) {
+            const nodeId = `node-${nodeIdCounter++}`;
+            nodesData.push({ id: nodeId, type: type, config: {} });
+            canvas.insertAdjacentHTML('beforeend', nodeTemplates[type](nodeId));
+            const newNode = document.getElementById(nodeId);
+            newNode.style.left = `${x}px`;
+            newNode.style.top = `${y}px`;
+        }
+
+        // ==========================================
+        // 3. WIRING & DRAGGING ENGINE
+        // ==========================================
+        function getHandleCenter(nodeId, handleClass, handleDataId) {
+            const node = document.getElementById(nodeId);
+            if(!node) return null;
+            const handle = Array.from(node.querySelectorAll(`.${handleClass}`)).find(h => h.getAttribute('data-handle') === handleDataId);
+            if (!handle) return null;
+
+            const rect = handle.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            return { x: (rect.left - canvasRect.left) + (rect.width / 2), y: (rect.top - canvasRect.top) + (rect.height / 2) };
+        }
+
+        function deleteNode(nodeId, event) {
+            event.stopPropagation();
+            const nodeEl = document.getElementById(nodeId);
+            if (nodeEl) nodeEl.remove();
+
+            nodesData = nodesData.filter(n => n.id !== nodeId);
+            const deadConnections = connections.filter(c => c.fromNode === nodeId || c.toNode === nodeId);
+            deadConnections.forEach(conn => {
+                const pathEl = document.getElementById(conn.id);
+                if (pathEl) pathEl.remove();
+            });
+            connections = connections.filter(c => c.fromNode !== nodeId && c.toNode !== nodeId);
+
+            showLibraryPanel();
+            if (nodesData.length === 0) emptyState.style.display = 'flex';
+        }
+
+        svgLayer.addEventListener('dblclick', (e) => {
+            if (e.target.tagName === 'path' && e.target.id.startsWith('conn-')) {
+                const connId = e.target.id;
+                connections = connections.filter(c => c.id !== connId);
+                e.target.remove();
+            }
+        });
+
+        function redrawAllConnections() {
+            connections.forEach(conn => {
+                const startPos = getHandleCenter(conn.fromNode, 'handle-out', conn.fromHandle);
+                const endPos = getHandleCenter(conn.toNode, 'handle-in', conn.toHandle);
+
+                if (startPos && endPos) {
+                    const pathEl = document.getElementById(conn.id);
+                    const curveFactor = Math.max(Math.abs(endPos.x - startPos.x) * 0.5, 50);
+                    const pathData = `M ${startPos.x} ${startPos.y} C ${startPos.x + curveFactor} ${startPos.y}, ${endPos.x - curveFactor} ${endPos.y}, ${endPos.x} ${endPos.y}`;
+                    pathEl.setAttribute('d', pathData);
+                }
+            });
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('handle-out')) {
+                isConnecting = true;
+                connectionStartHandle = e.target;
+                tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                tempLine.setAttribute('stroke', '#94a3b8');
+                tempLine.setAttribute('stroke-width', '2');
+                tempLine.setAttribute('fill', 'none');
+                tempLine.setAttribute('stroke-dasharray', '5,5');
+                svgLayer.appendChild(tempLine);
+                return;
+            }
+
+            const node = e.target.closest('.node-card');
+            if (node && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                activeDragNode = node;
+                startX = e.clientX; startY = e.clientY;
+                initialLeft = parseInt(window.getComputedStyle(node).left, 10) || 0;
+                initialTop = parseInt(window.getComputedStyle(node).top, 10) || 0;
+                node.style.zIndex = "50";
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isConnecting && tempLine && connectionStartHandle) {
+                const canvasRect = canvas.getBoundingClientRect();
+                const handleRect = connectionStartHandle.getBoundingClientRect();
+                const startX = (handleRect.left - canvasRect.left) + (handleRect.width / 2);
+                const startY = (handleRect.top - canvasRect.top) + (handleRect.height / 2);
+                const endX = e.clientX - canvasRect.left;
+                const endY = e.clientY - canvasRect.top;
+                const curveFactor = Math.max(Math.abs(endX - startX) * 0.5, 50);
+                tempLine.setAttribute('d', `M ${startX} ${startY} C ${startX + curveFactor} ${startY}, ${endX - curveFactor} ${endY}, ${endX} ${endY}`);
+            }
+            if (activeDragNode) {
+                activeDragNode.style.left = `${initialLeft + (e.clientX - startX)}px`;
+                activeDragNode.style.top = `${initialTop + (e.clientY - startY)}px`;
+                redrawAllConnections();
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (isConnecting) {
+                if (e.target.classList.contains('handle-in')) {
+                    const fromNode = connectionStartHandle.getAttribute('data-node');
+                    const fromHandle = connectionStartHandle.getAttribute('data-handle');
+                    const toNode = e.target.getAttribute('data-node');
+                    const toHandle = e.target.getAttribute('data-handle');
+
+                    if(fromNode !== toNode) {
+                        const connId = `conn-${Date.now()}`;
+                        connections.push({ id: connId, fromNode, fromHandle, toNode, toHandle });
+                        tempLine.id = connId;
+                        tempLine.removeAttribute('stroke-dasharray');
+                        if(fromHandle === 'out-true') tempLine.setAttribute('stroke', '#ef4444');
+                        else tempLine.setAttribute('stroke', '#64748b');
+
+                        tempLine.classList.add('wire-path');
+
+                        tempLine = null;
+                        redrawAllConnections();
+                    } else {
+                        if(tempLine) tempLine.remove();
+                    }
+                } else {
+                    if(tempLine) tempLine.remove();
+                }
+                isConnecting = false; connectionStartHandle = null; tempLine = null;
+            }
+            if (activeDragNode) {
+                activeDragNode.style.zIndex = "10";
+                activeDragNode = null;
+            }
+        });
+
+        // ==========================================
+        // 4. SIDEBAR SETTINGS LOGIC
+        // ==========================================
+        const panelLibrary = document.getElementById('panel-library');
+        const panelSettings = document.getElementById('panel-settings');
+        const settingsContent = document.getElementById('settings-content');
+
+        canvas.addEventListener('click', (e) => {
+            if(e.target === canvas) {
+                showLibraryPanel();
+                document.querySelectorAll('.node-card').forEach(n => n.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-1'));
+            }
+        });
+
+        function showLibraryPanel() {
+            panelLibrary.classList.remove('hidden-panel');
+            panelSettings.classList.add('hidden-panel');
+        }
+
+        function showSettingsPanel(nodeId, type, event) {
+            event.stopPropagation();
+            currentSelectedNodeId = nodeId;
+
+            document.querySelectorAll('.node-card').forEach(n => n.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-1'));
+            document.getElementById(nodeId).classList.add('ring-2', 'ring-indigo-500', 'ring-offset-1');
+
+            panelLibrary.classList.add('hidden-panel');
+            panelSettings.classList.remove('hidden-panel');
+
+            let config = nodesData.find(n => n.id === nodeId)?.config || {};
+
+            if (type === 'telemetry') {
+                // 1. Show loading state
+                settingsContent.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-40 text-slate-400">
+                        <svg class="animate-spin w-6 h-6 mb-2 text-indigo-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span class="text-xs">Fetching active hardware...</span>
+                    </div>`;
+
+                // 2. Fetch the actual payload
+                fetch('/api/devices', {
+                    headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
+                })
+                .then(res => res.json())
+                .then(payload => {
+                    // payload is: {'Consentium-Mote': ['Temperature', ...], 'testdevice': ['Temperature']}
+                    const deviceNames = Object.keys(payload);
+
+                    // Default to the saved hardware in config, or the first device in the list
+                    const activeDeviceName = config.targetHardware && deviceNames.includes(config.targetHardware)
+                        ? config.targetHardware
+                        : deviceNames[0];
+
+                    // Generate the <option> list for the dropdown
+                    const deviceOptions = deviceNames.map(dev =>
+                        `<option value="${dev}" ${activeDeviceName === dev ? 'selected' : ''}>${dev}</option>`
+                    ).join('');
+
+                    // Helper function to generate sensor checkboxes based on a device name
+                    const generateSensorHTML = (deviceName) => {
+                        const sensors = payload[deviceName] || [];
+                        if (sensors.length === 0) return '<div class="p-3 text-xs text-slate-500">No sensors found.</div>';
+
+                        return sensors.map(sensor => {
+                            // Sanitize sensor name for the HTML ID (removes spaces)
+                            const safeId = sensor.replace(/\\s+/g, '_');
+                            const isChecked = config[`sensor_${safeId}`] !== false; // Default to checked if undefined
+
+                            return `
+                            <label class="flex items-center gap-3 px-3 py-2 border-b border-slate-200 hover:bg-slate-100 cursor-pointer transition-colors">
+                                <input type="checkbox" id="setting-sensor_${safeId}" ${isChecked ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                <span class="text-sm text-slate-700 font-medium">${sensor}</span>
+                            </label>`;
+                        }).join('');
+                    };
+
+                    // 3. Inject the UI
+                    settingsContent.innerHTML = `
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900">Telemetry Source</h2>
+                                <p class="text-[10px] text-slate-500">Configure data ingestion</p>
+                            </div>
+                        </div>
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Hardware</label>
+                                <select id="setting-targetHardware" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                    ${deviceOptions}
+                                </select>
+                            </div>
+                            <div class="pt-2 border-t border-slate-100">
+                                <label class="block text-xs font-semibold text-slate-700 mb-2">Active Sensors</label>
+                                <div id="sensor-container" class="border border-slate-200 rounded-md bg-slate-50 overflow-hidden">
+                                    ${generateSensorHTML(activeDeviceName)}
+                                </div>
+                            </div>
+                        </div>`;
+
+                    // 4. Attach event listener to dynamically update sensors when hardware changes
+                    document.getElementById('setting-targetHardware').addEventListener('change', (e) => {
+                        document.getElementById('sensor-container').innerHTML = generateSensorHTML(e.target.value);
+                    });
+
+                })
+                .catch(err => {
+                    console.error("Device fetch error:", err);
+                    settingsContent.innerHTML = `<div class="p-4 text-xs text-red-500">Failed to load hardware. Please check your API connection.</div>`;
+                });
+            } else if (type === 'gemini') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg></div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Gemini Analysis</h2><p class="text-[10px] text-slate-500">LLM-based data inference</p></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">API Key</label>
+                            <input type="password" id="setting-apiKey" placeholder="AIzaSy..." value="${config.apiKey || ''}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Model</label>
+                            <select id="setting-model" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.model === 'gemini-1.5-flash' ? 'selected' : ''}>gemini-1.5-flash</option>
+                                <option ${config.model === 'gemini-1.5-pro' ? 'selected' : ''}>gemini-1.5-pro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">System Prompt</label>
+                            <textarea id="setting-prompt" rows="4" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-xs font-mono resize-none focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Analyze this sensor data for anomalies...">${config.prompt || 'You are an IoT analysis assistant. Review the following telemetry data and output a JSON object containing "status" (normal/anomaly) and "reason".'}</textarea>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-semibold text-slate-700">Temperature</label>
+                                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">${config.temperature || 0.2}</span>
+                            </div>
+                            <input type="range" id="setting-temperature" min="0" max="1" step="0.1" value="${config.temperature || 0.2}" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="this.previousElementSibling.querySelector('span').innerText = this.value">
+                        </div>
+                    </div>`;
+            } else if (type === 'movingaverage') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Moving Average</h2><p class="text-[10px] text-slate-500">Smooth out short-term fluctuations</p></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Average Type</label>
+                            <select id="setting-avgType" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
+                                <option ${config.avgType === 'Simple (SMA)' ? 'selected' : ''}>Simple (SMA)</option>
+                                <option ${config.avgType === 'Exponential (EMA)' ? 'selected' : ''}>Exponential (EMA)</option>
+                                <option ${config.avgType === 'Weighted (WMA)' ? 'selected' : ''}>Weighted (WMA)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Window Size</label>
+                            <p class="text-[10px] text-slate-500 mb-2">Number of data points to include in the average.</p>
+                            <input type="number" id="setting-windowSize" value="${config.windowSize || 10}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+                        </div>
+                    </div>`;
+            } else if (type === 'zscore') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">Z-Score Config</h2>
+                            <p class="text-[10px] text-slate-500">Statistical anomaly detection</p>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Rolling Window Size</label>
+                            <p class="text-[10px] text-slate-500 mb-2">Number of historical points for mean/std dev.</p>
+                            <input type="number" id="setting-windowSize" value="${config.windowSize || 30}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div class="pt-2 border-t border-slate-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block text-xs font-semibold text-slate-700">Sensitivity Threshold</label>
+                                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">2.5 σ</span>
+                            </div>
+                            <input type="range" id="setting-threshold" min="1" max="5" step="0.1" value="${config.threshold || 2.5}" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        </div>
+                        <label class="flex items-start gap-2 pt-2 cursor-pointer">
+                            <input type="checkbox" id="setting-passthrough" ${config.passthrough !== false ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
+                            <div>
+                                <span class="block text-xs font-semibold text-slate-700">Pass-through Normal Data</span>
+                                <span class="block text-[10px] text-slate-500">Attach original payload to 'False' output.</span>
+                            </div>
+                        </label>
+                    </div>`;
+            } else if (type === 'threshold') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg></div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Logical Threshold</h2><p class="text-[10px] text-slate-500">Simple condition routing</p></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Metric</label>
+                            <input type="text" id="setting-metric" value="${config.metric || 'Speed'}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Condition</label>
+                            <select id="setting-operator" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
+                                <option ${config.operator === '>' ? 'selected' : ''}>></option>
+                                <option ${config.operator === '<' ? 'selected' : ''}><</option>
+                                <option ${config.operator === '>=' ? 'selected' : ''}>>=</option>
+                                <option ${config.operator === '<=' ? 'selected' : ''}><=</option>
+                                <option ${config.operator === '==' ? 'selected' : ''}>==</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Threshold Value</label>
+                            <input type="number" id="setting-value" value="${config.value || 50}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm">
+                        </div>
+                    </div>`;
+            } else if (type === 'alert') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-red-50 text-red-600 flex items-center justify-center border border-red-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">Send Alert</h2>
+                            <p class="text-[10px] text-slate-500">Notification & Webhooks</p>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Action Type</label>
+                            <select id="setting-actionType" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.actionType === 'Email Notification' ? 'selected' : ''}>Email Notification</option>
+                                <option ${config.actionType === 'SMS Alert' ? 'selected' : ''}>SMS Alert</option>
+                                <option ${config.actionType === 'Custom Webhook (POST)' ? 'selected' : ''}>Custom Webhook (POST)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Recipient / Endpoint</label>
+                            <input type="text" id="setting-recipient" value="${config.recipient || 'admin@bosonix.com'}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Message Template</label>
+                            <textarea id="setting-template" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-xs focus:ring-1 focus:ring-indigo-500 outline-none font-mono text-slate-600 resize-none">${config.template || 'Alert triggered on {{device_id}}!\nMetric: {{metric_name}}\nValue: {{value}}'}</textarea>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Throttling (Cooldown)</label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-slate-600">Max 1 alert per</span>
+                                <input type="number" id="setting-cooldownLimit" value="${config.cooldownLimit || 15}" class="w-16 px-2 py-1 border border-slate-300 rounded-md shadow-sm text-sm text-center focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <select id="setting-cooldownUnit" class="px-2 py-1 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                    <option ${config.cooldownUnit === 'Mins' ? 'selected' : ''}>Mins</option>
+                                    <option ${config.cooldownUnit === 'Hours' ? 'selected' : ''}>Hours</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (type === 'arima') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-green-50 text-green-600 flex items-center justify-center border border-green-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">ARIMA Forecast</h2>
+                            <p class="text-[10px] text-slate-500">EdgeNeuron predictive modeling</p>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-md">
+                            <label class="block text-xs font-semibold text-slate-800 mb-3">Model Parameters</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 text-center">p</label><input type="number" id="setting-p" value="${config.p || 4}" class="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm text-center"></div>
+                                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 text-center">d</label><input type="number" id="setting-d" value="${config.d || 1}" class="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm text-center"></div>
+                                <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 text-center">q</label><input type="number" id="setting-q" value="${config.q || 5}" class="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm text-center"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Horizon (steps)</label>
+                                <input type="number" id="setting-horizon" value="${config.horizon || 10}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Confidence</label>
+                                <select id="setting-confidence" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                    <option ${config.confidence === '95%' ? 'selected' : ''}>95%</option>
+                                    <option ${config.confidence === '99%' ? 'selected' : ''}>99%</option>
+                                    <option ${config.confidence === '90%' ? 'selected' : ''}>90%</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>`;
+            } else if (type === 'kalman') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Kalman Filter</h2><p class="text-[10px] text-slate-500">Sensor noise reduction</p></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div><label class="block text-xs font-semibold text-slate-700 mb-1">Process Noise (Q)</label><input type="number" id="setting-q" step="0.01" value="${config.q || 0.01}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm"></div>
+                        <div><label class="block text-xs font-semibold text-slate-700 mb-1">Measurement Noise (R)</label><input type="number" id="setting-r" step="0.1" value="${config.r || 1.0}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm"></div>
+                        <div><label class="block text-xs font-semibold text-slate-700 mb-1">Estimated Error (P)</label><input type="number" id="setting-p" step="0.1" value="${config.p || 1.0}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm"></div>
+                    </div>`;
+            } else if (type === 'holtwinters') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Holt-Winters</h2><p class="text-[10px] text-slate-500">Exponential Smoothing</p></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Alpha</label><input type="number" id="setting-alpha" step="0.1" max="1" value="${config.alpha || 0.2}" class="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm text-center"></div>
+                            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Beta</label><input type="number" id="setting-beta" step="0.1" max="1" value="${config.beta || 0.1}" class="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm text-center"></div>
+                            <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Gamma</label><input type="number" id="setting-gamma" step="0.1" max="1" value="${config.gamma || 0.3}" class="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm text-center"></div>
+                        </div>
+                        <div><label class="block text-xs font-semibold text-slate-700 mb-1">Seasonality Period (L)</label><input type="number" id="setting-period" value="${config.period || 12}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm"></div>
+                    </div>`;
+            } else if (type === 'livechart') {
+                settingsContent.innerHTML = `
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg></div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Live Preview</h2><p class="text-[10px] text-slate-500">Real-time data visualization</p></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Chart Type</label>
+                            <select id="setting-chartType" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
+                                <option ${config.chartType === 'Time-Series Line' ? 'selected' : ''}>Time-Series Line</option>
+                                <option ${config.chartType === 'Scatter Plot (Anomalies)' ? 'selected' : ''}>Scatter Plot (Anomalies)</option>
+                                <option ${config.chartType === 'Bar (Aggregated)' ? 'selected' : ''}>Bar (Aggregated)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Y-Axis Scale</label>
+                            <select id="setting-yAxis" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
+                                <option ${config.yAxis === 'Auto-scale' ? 'selected' : ''}>Auto-scale</option>
+                                <option ${config.yAxis === 'Fixed (0 - 100)' ? 'selected' : ''}>Fixed (0 - 100)</option>
+                                <option ${config.yAxis === 'Logarithmic' ? 'selected' : ''}>Logarithmic</option>
+                            </select>
+                        </div>
+                        <label class="flex items-center gap-2 pt-2 cursor-pointer">
+                            <input type="checkbox" id="setting-showThresholds" ${config.showThresholds !== false ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                            <span class="text-xs font-semibold text-slate-700">Overlay Anomaly Thresholds</span>
+                        </label>
+
+                        <div class="mt-6 pt-4 border-t border-slate-200">
+                            <button onclick="storeGraph()" class="w-full py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                                Save to Stored Graphs
+                            </button>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        function applySettings() {
+            if (!currentSelectedNodeId) return;
+            const nodeIndex = nodesData.findIndex(n => n.id === currentSelectedNodeId);
+            if (nodeIndex === -1) return;
+
+            const config = {};
+            const inputs = settingsContent.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if(input.id) config[input.id.replace('setting-', '')] = input.type === 'checkbox' ? input.checked : input.value;
+            });
+
+            nodesData[nodeIndex].config = config;
+
+            showLibraryPanel();
+            document.getElementById(currentSelectedNodeId).classList.add('ring-2', 'ring-green-400');
+            setTimeout(() => {
+                document.getElementById(currentSelectedNodeId)?.classList.remove('ring-2', 'ring-green-400');
+            }, 500);
+        }
+
+        // ==========================================
+        // 5. SAVED GRAPHS LOGIC (BOTTOM DRAWER)
+        // ==========================================
+        function toggleSavedGraphs(e) {
+            if(e) e.stopPropagation();
+            const panel = document.getElementById('saved-graphs-panel');
+            if (panel.classList.contains('translate-y-full')) {
+                panel.classList.remove('translate-y-full');
+                panel.classList.add('translate-y-0');
+            } else {
+                panel.classList.remove('translate-y-0');
+                panel.classList.add('translate-y-full');
+            }
+        }
+
+        function storeGraph() {
+            if (!currentSelectedNodeId) return;
+
+            const chartType = document.getElementById('setting-chartType')?.value || 'Time-Series';
+
+            savedGraphsList.push({
+                id: 'graph-' + Date.now(),
+                title: chartType,
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})
+            });
+
+            updateSavedGraphsUI();
+
+            const panel = document.getElementById('saved-graphs-panel');
+            if (panel.classList.contains('translate-y-full')) {
+                toggleSavedGraphs();
+            }
+        }
+
+        function updateSavedGraphsUI() {
+            const container = document.getElementById('saved-graphs-container');
+            const toggleBtn = document.getElementById('saved-graphs-toggle');
+            const countSpan = document.getElementById('saved-graph-count');
+
+            countSpan.innerText = savedGraphsList.length;
+
+            if (savedGraphsList.length > 0) {
+                toggleBtn.classList.remove('hidden');
+                let html = '';
+                savedGraphsList.forEach(g => {
+                    html += `
+                        <div class="w-72 h-48 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col shrink-0 overflow-hidden">
+                            <div class="px-3 py-2 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <span class="text-xs font-bold text-slate-700">${g.title}</span>
+                                <span class="text-[10px] text-slate-400">${g.timestamp}</span>
+                            </div>
+                            <div class="flex-1 flex items-center justify-center bg-slate-900 relative">
+                                <svg viewBox="0 0 100 35" class="w-full h-full opacity-80 pt-2 px-2">
+                                    <polyline points="0,25 15,10 30,28 45,5 60,20 75,8 100,18" fill="none" stroke="#ec4899" stroke-width="1.5" />
+                                </svg>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            } else {
+                toggleBtn.classList.add('hidden');
+                container.innerHTML = `<div class="flex flex-col items-center justify-center w-full h-full text-slate-400"><p class="text-sm">No graphs saved yet.</p></div>`;
+            }
+        }
+
+        // ==========================================
+        // EXPORT & UTILS
+        // ==========================================
+        async function exportPipeline() {
+            if (nodesData.length === 0) {
+                alert("Cannot deploy an empty workspace.");
+                return;
+            }
+
+            const payload = {
+                version: "1.0",
+                platform: "Consentium EdgeNeuron",
+                title: "New SignalFlow Graph",
+                timestamp: new Date().toISOString(),
+                nodes: nodesData,
+                topology: connections.map(c => ({
+                    source: c.fromNode,
+                    target: c.toNode,
+                    trigger: c.fromHandle
+                }))
+            };
+
+            // UI Feedback: Change button state
+            const deployBtn = document.getElementById('deploy-btn');
+            const originalText = deployBtn.innerText;
+            deployBtn.innerText = "Deploying...";
+            deployBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/v1/pipelines', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer YOUR_AUTH_TOKEN'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Deployment failed');
+
+                const data = await response.json();
+                alert(`Pipeline Deployed successfully! ID: ${data.pipeline_id}`);
+
+            } catch (error) {
+                console.error("Deploy Error:", error);
+                alert("Failed to deploy pipeline. Check console for details.");
+            } finally {
+                deployBtn.innerText = originalText;
+                deployBtn.disabled = false;
+            }
+        }
+
+        function clearCanvas(e) {
+            e.stopPropagation();
+            document.querySelectorAll('.node-card').forEach(node => node.remove());
+            svgLayer.innerHTML = '';
+            connections = [];
+            nodesData = [];
+            emptyState.style.display = 'flex';
+            showLibraryPanel();
+        }
+    </script>
+</body>
+</html>
