@@ -308,28 +308,28 @@
         // 2. HTML NODE TEMPLATES
         // ==========================================
         const nodeTemplates = {
-            'telemetry': (id) => `
-                <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <button onclick="showSettingsPanel('${id}', 'telemetry', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    </button>
+        'telemetry': (id) => `
+            <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <button onclick="showSettingsPanel('${id}', 'telemetry', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
 
-                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        </div>
-                        <div class="flex-1 min-w-0 pr-12">
-                            <h3 class="text-sm font-semibold text-slate-800 leading-tight truncate">Data Source</h3>
-                            <p class="text-[11px] text-slate-500">Device Telemetry</p>
-                        </div>
+                <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
-                    <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative">
-                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                    <div class="flex-1 min-w-0 pr-12">
+                        <h3 class="node-title text-sm font-semibold text-slate-800 leading-tight truncate">Data Source</h3>
+                        <p class="node-subtitle text-[11px] font-medium text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded mt-0.5 border border-blue-100">Unconfigured</p>
                     </div>
-                </div>`,
+                </div>
+                <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative">
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>
+            </div>`,
 
             'gemini': (id) => `
                 <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-indigo-500 cursor-move" style="z-index: 10;">
@@ -712,14 +712,13 @@
                         const sensors = payload[deviceName] || [];
                         if (sensors.length === 0) return '<div class="p-3 text-xs text-slate-500">No sensors found.</div>';
 
-                        return sensors.map(sensor => {
-                            // Sanitize sensor name for the HTML ID (removes spaces)
-                            const safeId = sensor.replace(/\\s+/g, '_');
-                            const isChecked = config[`sensor_${safeId}`] !== false; // Default to checked if undefined
+                        return sensors.map((sensor, index) => {
+                            // Automatically check the saved sensor, or default to the first one in the list
+                            const isChecked = config.activeSensor === sensor || (!config.activeSensor && index === 0);
 
                             return `
                             <label class="flex items-center gap-3 px-3 py-2 border-b border-slate-200 hover:bg-slate-100 cursor-pointer transition-colors">
-                                <input type="checkbox" id="setting-sensor_${safeId}" ${isChecked ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                <input type="radio" name="setting-activeSensor" value="${sensor}" ${isChecked ? 'checked' : ''} class="text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300">
                                 <span class="text-sm text-slate-700 font-medium">${sensor}</span>
                             </label>`;
                         }).join('');
@@ -1036,16 +1035,39 @@
 
             const config = {};
             const inputs = settingsContent.querySelectorAll('input, select, textarea');
+
+            // Parse inputs (handles both standard inputs and radio groups)
             inputs.forEach(input => {
-                if(input.id) config[input.id.replace('setting-', '')] = input.type === 'checkbox' ? input.checked : input.value;
+                if (input.type === 'radio') {
+                    if (input.checked && input.name.startsWith('setting-')) {
+                        config[input.name.replace('setting-', '')] = input.value;
+                    }
+                } else if (input.id && input.id.startsWith('setting-')) {
+                    config[input.id.replace('setting-', '')] = input.type === 'checkbox' ? input.checked : input.value;
+                }
             });
 
+            // Save to global state
             nodesData[nodeIndex].config = config;
 
+            // --- Update UI on Canvas dynamically ---
+            const nodeEl = document.getElementById(currentSelectedNodeId);
+            const nodeType = nodesData[nodeIndex].type;
+
+            if (nodeType === 'telemetry') {
+                const titleEl = nodeEl.querySelector('.node-title');
+                const subtitleEl = nodeEl.querySelector('.node-subtitle');
+
+                if (titleEl) titleEl.innerText = config.targetHardware || 'Data Source';
+                if (subtitleEl) subtitleEl.innerText = config.activeSensor ? `Sensor: ${config.activeSensor}` : 'Unconfigured';
+            }
+            // ---------------------------------------
+
+            // Visual feedback
             showLibraryPanel();
-            document.getElementById(currentSelectedNodeId).classList.add('ring-2', 'ring-green-400');
+            nodeEl.classList.add('ring-2', 'ring-green-400');
             setTimeout(() => {
-                document.getElementById(currentSelectedNodeId)?.classList.remove('ring-2', 'ring-green-400');
+                nodeEl.classList.remove('ring-2', 'ring-green-400');
             }, 500);
         }
 
