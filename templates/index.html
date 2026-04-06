@@ -116,7 +116,7 @@
                     <span class="text-xs text-slate-500"><span class="font-bold text-slate-700">Tip:</span> Double-click a wire to delete it.</span>
                 </div>
 
-                <button id="saved-graphs-toggle" onclick="toggleSavedGraphs(event)" class="absolute bottom-6 right-6 z-30 px-4 py-2 bg-white border border-slate-200 shadow-md rounded-full text-sm font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 transition-all flex items-center gap-2">
+                <button id="saved-graphs-toggle" onclick="toggleSavedGraphs(event)" class="absolute bottom-6 right-6 z-30 px-4 py-2 bg-white border border-slate-200 shadow-md rounded-full text-sm font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 transition-all flex items-center gap-2 hidden">
                     <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2h-2a2 2 0 01-2-2z"></path></svg>
                     Stored Graphs (<span id="saved-graph-count">0</span>)
                 </button>
@@ -273,11 +273,9 @@
         let connections = [];
         let currentSelectedNodeId = null;
 
-        // Pre-populated saved graphs
-        let savedGraphsList = [
-            { id: 'graph-1', title: 'Motor Vibration (AI Filtered)', timestamp: '08:30 AM' },
-            { id: 'graph-2', title: 'Belt Speed Anomalies', timestamp: '09:15 AM' }
-        ];
+        // Connect directly to the browser's persistent storage
+        let savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
+        let localPipelinesStore = JSON.parse(localStorage.getItem('signalflow_pipelines_store')) || {};
 
         let activeDragNode = null;
         let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
@@ -288,7 +286,7 @@
 
         // Initialize UI
         window.addEventListener('DOMContentLoaded', () => {
-            updateSavedGraphsUI();
+            fetchSavedGraphs();
         });
 
         // ==========================================
@@ -350,194 +348,194 @@
                 </div>
             </div>`,
 
-            'gemini': (id) => `
-                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-indigo-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <button onclick="showSettingsPanel('${id}', 'gemini', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                    <div class="p-3 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                        </div>
-                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Gemini Analysis</h3></div>
+        'gemini': (id) => `
+            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-indigo-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <button onclick="showSettingsPanel('${id}', 'gemini', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                <div class="p-3 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
                     </div>
-                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-                </div>`,
+                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Gemini Analysis</h3></div>
+                </div>
+                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+            </div>`,
 
-            'movingaverage': (id) => `
-                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-cyan-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <button onclick="showSettingsPanel('${id}', 'movingaverage', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                    <div class="p-3 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-cyan-50 text-cyan-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                        </div>
-                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Moving Avg</h3></div>
+        'movingaverage': (id) => `
+            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-cyan-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <button onclick="showSettingsPanel('${id}', 'movingaverage', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                <div class="p-3 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-cyan-50 text-cyan-600 flex items-center justify-center">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                     </div>
-                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-                </div>`,
+                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Moving Avg</h3></div>
+                </div>
+                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+            </div>`,
 
-            'zscore': (id) => `
-                <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-purple-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <button onclick="showSettingsPanel('${id}', 'zscore', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+        'zscore': (id) => `
+            <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-purple-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <button onclick="showSettingsPanel('${id}', 'zscore', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
 
-                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-purple-50 text-purple-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-purple-50 text-purple-600 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-800 leading-tight">Z-Score Anomaly</h3>
+                    </div>
+                </div>
+                <div class="flex flex-col text-xs font-medium">
+                    <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
+                        <span class="text-red-500">True (Anomaly)</span>
+                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-red-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
+                    </div>
+                    <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
+                        <span class="text-slate-600">False (Normal)</span>
+                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
+                    </div>
+                </div>
+            </div>`,
+
+        'threshold': (id) => `
+            <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-amber-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <button onclick="showSettingsPanel('${id}', 'threshold', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-800 leading-tight">Threshold</h3>
+                    </div>
+                </div>
+                <div class="flex flex-col text-xs font-medium">
+                    <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
+                        <span class="text-amber-600">True (Match)</span>
+                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-amber-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
+                    </div>
+                    <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
+                        <span class="text-slate-600">False (No Match)</span>
+                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
+                    </div>
+                </div>
+            </div>`,
+
+        'arima': (id) => `
+            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <button onclick="showSettingsPanel('${id}', 'arima', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                <div class="p-3 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-green-50 text-green-600 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    </div>
+                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">ARIMA Forecast</h3></div>
+                </div>
+                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+            </div>`,
+
+        'kalman': (id) => `
+            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                <button onclick="showSettingsPanel('${id}', 'kalman', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                <div class="p-3 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-orange-50 text-orange-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
+                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Kalman Filter</h3></div>
+                </div>
+                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+            </div>`,
+
+        'holtwinters': (id) => `
+            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-teal-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                <button onclick="showSettingsPanel('${id}', 'holtwinters', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                <div class="p-3 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-teal-50 text-teal-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Holt-Winters</h3></div>
+                </div>
+                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+            </div>`,
+
+        'alert': (id) => `
+            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500 cursor-move" style="z-index: 10;">
+                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+                <button onclick="showSettingsPanel('${id}', 'alert', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                <div class="p-3 flex items-center gap-3 pointer-events-none">
+                    <div class="w-7 h-7 rounded bg-red-50 text-red-600 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Send Alert</h3></div>
+                </div>
+            </div>`,
+
+        'livechart': (id) => `
+            <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-pink-500 cursor-move" style="z-index: 10;">
+                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+
+                <div class="flex justify-between items-center p-2 border-b border-slate-100">
+                    <div class="flex items-center gap-2 pointer-events-none">
+                        <div class="w-6 h-6 rounded bg-pink-50 text-pink-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg>
                         </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-slate-800 leading-tight">Z-Score Anomaly</h3>
+                        <h3 class="text-xs font-semibold text-slate-800">Live Chart</h3>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="deleteNode('${id}', event)" class="text-slate-400 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        <button onclick="showSettingsPanel('${id}', 'livechart', event)" class="text-slate-400 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    </div>
+                </div>
+
+                <div class="p-2 bg-slate-900 rounded-b-lg pointer-events-none">
+                    <div class="flex justify-between items-center mb-2 px-1">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Stream Preview</span>
+                        <div class="flex gap-2">
+                            <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Raw</span>
+                            <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> AI Output</span>
                         </div>
                     </div>
-                    <div class="flex flex-col text-xs font-medium">
-                        <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
-                            <span class="text-red-500">True (Anomaly)</span>
-                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-red-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
-                        </div>
-                        <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
-                            <span class="text-slate-600">False (Normal)</span>
-                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
-                        </div>
-                    </div>
-                </div>`,
-
-            'threshold': (id) => `
-                <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-amber-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <button onclick="showSettingsPanel('${id}', 'threshold', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-amber-50 text-amber-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-slate-800 leading-tight">Threshold</h3>
-                        </div>
-                    </div>
-                    <div class="flex flex-col text-xs font-medium">
-                        <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
-                            <span class="text-amber-600">True (Match)</span>
-                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-amber-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
-                        </div>
-                        <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
-                            <span class="text-slate-600">False (No Match)</span>
-                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
-                        </div>
-                    </div>
-                </div>`,
-
-            'arima': (id) => `
-                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <button onclick="showSettingsPanel('${id}', 'arima', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                    <div class="p-3 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-green-50 text-green-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                        </div>
-                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">ARIMA Forecast</h3></div>
-                    </div>
-                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-                </div>`,
-
-            'kalman': (id) => `
-                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                    <button onclick="showSettingsPanel('${id}', 'kalman', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                    <div class="p-3 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-orange-50 text-orange-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
-                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Kalman Filter</h3></div>
-                    </div>
-                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-                </div>`,
-
-            'holtwinters': (id) => `
-                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-teal-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                    <button onclick="showSettingsPanel('${id}', 'holtwinters', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                    <div class="p-3 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-teal-50 text-teal-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
-                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Holt-Winters</h3></div>
-                    </div>
-                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-                </div>`,
-
-            'alert': (id) => `
-                <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500 cursor-move" style="z-index: 10;">
-                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                    <button onclick="showSettingsPanel('${id}', 'alert', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                    <div class="p-3 flex items-center gap-3 pointer-events-none">
-                        <div class="w-7 h-7 rounded bg-red-50 text-red-600 flex items-center justify-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Send Alert</h3></div>
-                    </div>
-                </div>`,
-
-            'livechart': (id) => `
-                <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-pink-500 cursor-move" style="z-index: 10;">
-                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                    <div class="flex justify-between items-center p-2 border-b border-slate-100">
-                        <div class="flex items-center gap-2 pointer-events-none">
-                            <div class="w-6 h-6 rounded bg-pink-50 text-pink-600 flex items-center justify-center">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg>
-                            </div>
-                            <h3 class="text-xs font-semibold text-slate-800">Live Chart</h3>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button onclick="deleteNode('${id}', event)" class="text-slate-400 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                            <button onclick="showSettingsPanel('${id}', 'livechart', event)" class="text-slate-400 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                        </div>
-                    </div>
-
-                    <div class="p-2 bg-slate-900 rounded-b-lg pointer-events-none">
-                        <div class="flex justify-between items-center mb-2 px-1">
-                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Stream Preview</span>
-                            <div class="flex gap-2">
-                                <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Raw</span>
-                                <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> AI Output</span>
-                            </div>
-                        </div>
-                        <svg viewBox="0 0 100 35" class="w-full h-20 overflow-visible">
-                            <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
-                            <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
-                            <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
-                            <polyline points="0,25 10,15 20,28 30,12 40,22 50,8 60,25 70,5 80,18 90,10 100,20" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
-                            <path d="M0,22 C15,18 25,20 35,16 C45,12 55,18 65,14 C75,10 85,15 100,12" fill="none" stroke="#ec4899" stroke-width="1.5" />
-                        </svg>
-                    </div>
-                </div>`
+                    <svg viewBox="0 0 100 35" class="w-full h-20 overflow-visible">
+                        <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
+                        <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
+                        <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
+                        <polyline points="0,25 10,15 20,28 30,12 40,22 50,8 60,25 70,5 80,18 90,10 100,20" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
+                        <path d="M0,22 C15,18 25,20 35,16 C45,12 55,18 65,14 C75,10 85,15 100,12" fill="none" stroke="#ec4899" stroke-width="1.5" />
+                    </svg>
+                </div>
+            </div>`
         };
 
-        function instantiateNode(type, x, y) {
-            const nodeId = `node-${nodeIdCounter++}`;
+        function instantiateNode(type, x, y, forcedId = null) {
+            const nodeId = forcedId || `node-${nodeIdCounter++}`;
             nodesData.push({ id: nodeId, type: type, config: {} });
             canvas.insertAdjacentHTML('beforeend', nodeTemplates[type](nodeId));
             const newNode = document.getElementById(nodeId);
-            newNode.style.left = `${x}px`;
-            newNode.style.top = `${y}px`;
+            newNode.style.left = typeof x === 'string' ? x : `${x}px`;
+            newNode.style.top = typeof y === 'string' ? y : `${y}px`;
         }
 
         // ==========================================
@@ -700,41 +698,32 @@
             let config = nodesData.find(n => n.id === nodeId)?.config || {};
 
             if (type === 'telemetry') {
-                // 1. Show loading state
                 settingsContent.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-40 text-slate-400">
                         <svg class="animate-spin w-6 h-6 mb-2 text-indigo-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         <span class="text-xs">Fetching active hardware...</span>
                     </div>`;
 
-                // 2. Fetch the actual payload
                 fetch('/api/devices', {
                     headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
                 })
                 .then(res => res.json())
                 .then(payload => {
-                    // payload is: {'Consentium-Mote': ['Temperature', ...], 'testdevice': ['Temperature']}
                     const deviceNames = Object.keys(payload);
-
-                    // Default to the saved hardware in config, or the first device in the list
                     const activeDeviceName = config.targetHardware && deviceNames.includes(config.targetHardware)
                         ? config.targetHardware
                         : deviceNames[0];
 
-                    // Generate the <option> list for the dropdown
                     const deviceOptions = deviceNames.map(dev =>
                         `<option value="${dev}" ${activeDeviceName === dev ? 'selected' : ''}>${dev}</option>`
                     ).join('');
 
-                    // Helper function to generate sensor checkboxes based on a device name
                     const generateSensorHTML = (deviceName) => {
                         const sensors = payload[deviceName] || [];
                         if (sensors.length === 0) return '<div class="p-3 text-xs text-slate-500">No sensors found.</div>';
 
                         return sensors.map((sensor, index) => {
-                            // Automatically check the saved sensor, or default to the first one in the list
                             const isChecked = config.activeSensor === sensor || (!config.activeSensor && index === 0);
-
                             return `
                             <label class="flex items-center gap-3 px-3 py-2 border-b border-slate-200 hover:bg-slate-100 cursor-pointer transition-colors">
                                 <input type="radio" name="setting-activeSensor" value="${sensor}" ${isChecked ? 'checked' : ''} class="text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300">
@@ -743,7 +732,6 @@
                         }).join('');
                     };
 
-                    // 3. Inject the UI
                     settingsContent.innerHTML = `
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-10 h-10 rounded bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
@@ -769,7 +757,6 @@
                             </div>
                         </div>`;
 
-                    // 4. Attach event listener to dynamically update sensors when hardware changes
                     document.getElementById('setting-targetHardware').addEventListener('change', (e) => {
                         document.getElementById('sensor-container').innerHTML = generateSensorHTML(e.target.value);
                     });
@@ -817,6 +804,13 @@
                     </div>
                     <div class="space-y-4">
                         <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Average Type</label>
                             <select id="setting-avgType" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
                                 <option ${config.avgType === 'Simple (SMA)' ? 'selected' : ''}>Simple (SMA)</option>
@@ -842,6 +836,13 @@
                         </div>
                     </div>
                     <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Rolling Window Size</label>
                             <p class="text-[10px] text-slate-500 mb-2">Number of historical points for mean/std dev.</p>
@@ -869,6 +870,10 @@
                         <div><h2 class="text-sm font-bold text-slate-900">Logical Threshold</h2><p class="text-[10px] text-slate-500">Simple condition routing</p></div>
                     </div>
                     <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Metric</label>
+                            <input type="text" id="setting-metric" value="${config.metric || 'Speed'}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm">
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Condition</label>
                             <select id="setting-operator" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
@@ -936,6 +941,13 @@
                         </div>
                     </div>
                     <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-md">
                             <label class="block text-xs font-semibold text-slate-800 mb-3">Model Parameters</label>
                             <div class="grid grid-cols-3 gap-3">
@@ -1030,7 +1042,6 @@
             const config = {};
             const inputs = settingsContent.querySelectorAll('input, select, textarea');
 
-            // Parse inputs (handles both standard inputs and radio groups)
             inputs.forEach(input => {
                 if (input.type === 'radio') {
                     if (input.checked && input.name.startsWith('setting-')) {
@@ -1041,10 +1052,8 @@
                 }
             });
 
-            // Save to global state
             nodesData[nodeIndex].config = config;
 
-            // --- Update UI on Canvas dynamically ---
             const nodeEl = document.getElementById(currentSelectedNodeId);
             const nodeType = nodesData[nodeIndex].type;
 
@@ -1055,9 +1064,7 @@
                 if (titleEl) titleEl.innerText = config.targetHardware || 'Data Source';
                 if (subtitleEl) subtitleEl.innerText = config.activeSensor ? `Sensor: ${config.activeSensor}` : 'Unconfigured';
             }
-            // ---------------------------------------
 
-            // Visual feedback
             showLibraryPanel();
             nodeEl.classList.add('ring-2', 'ring-green-400');
             setTimeout(() => {
@@ -1080,22 +1087,24 @@
             }
         }
 
-        function storeGraph() {
-            if (!currentSelectedNodeId) return;
+        async function fetchSavedGraphs() {
+            try {
+                const response = await fetch('/api/v1/pipelines', {
+                    headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    savedGraphsList = data.data || [];
 
-            const chartType = document.getElementById('setting-chartType')?.value || 'Time-Series';
-
-            savedGraphsList.push({
-                id: 'graph-' + Date.now(),
-                title: chartType,
-                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})
-            });
-
-            updateSavedGraphsUI();
-
-            const panel = document.getElementById('saved-graphs-panel');
-            if (panel.classList.contains('translate-y-full')) {
-                toggleSavedGraphs();
+                    // Populate local store cache for quick loading
+                    savedGraphsList.forEach(graph => {
+                        localPipelinesStore[graph.id] = graph;
+                    });
+                }
+            } catch(e) {
+                console.warn("Backend not active. Using local pipeline storage.", e);
+            } finally {
+                updateSavedGraphsUI();
             }
         }
 
@@ -1110,16 +1119,28 @@
                 toggleBtn.classList.remove('hidden');
                 let html = '';
                 savedGraphsList.forEach(g => {
+                    let displayTime = g.timestamp;
+                    try {
+                        const d = new Date(g.timestamp);
+                        if (!isNaN(d.getTime())) displayTime = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    } catch(e) {}
+
                     html += `
-                        <div class="w-72 h-48 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col shrink-0 overflow-hidden">
+                        <div class="w-72 h-48 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col shrink-0 overflow-hidden group cursor-pointer relative" onclick="loadPipeline('${g.id}')">
                             <div class="px-3 py-2 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                 <span class="text-xs font-bold text-slate-700">${g.title}</span>
-                                <span class="text-[10px] text-slate-400">${g.timestamp}</span>
+                                <span class="text-[10px] text-slate-400">${displayTime}</span>
                             </div>
                             <div class="flex-1 flex items-center justify-center bg-slate-900 relative">
                                 <svg viewBox="0 0 100 35" class="w-full h-full opacity-80 pt-2 px-2">
                                     <polyline points="0,25 15,10 30,28 45,5 60,20 75,8 100,18" fill="none" stroke="#ec4899" stroke-width="1.5" />
                                 </svg>
+                            </div>
+                            <div class="absolute inset-0 bg-indigo-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-bold shadow-sm hover:bg-indigo-500 transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                    Load Flow
+                                </button>
                             </div>
                         </div>`;
                 });
@@ -1128,6 +1149,87 @@
                 toggleBtn.classList.add('hidden');
                 container.innerHTML = `<div class="flex flex-col items-center justify-center w-full h-full text-slate-400"><p class="text-sm">No graphs saved yet.</p></div>`;
             }
+        }
+
+        async function loadPipeline(pipelineId) {
+            let pipelineData;
+
+            try {
+                const response = await fetch(`/api/v1/pipelines/${pipelineId}`, {
+                    headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
+                });
+                if(response.ok) {
+                    const data = await response.json();
+                    pipelineData = data.pipeline || data;
+                } else {
+                    throw new Error("Backend load failed");
+                }
+            } catch (e) {
+                // Fallback to local memory if API isn't up
+                pipelineData = localPipelinesStore[pipelineId];
+            }
+
+            if (!pipelineData) {
+                alert("Pipeline data could not be found.");
+                return;
+            }
+
+            // Clean Slate
+            clearCanvas(new Event('click'));
+            emptyState.style.display = 'none';
+            toggleSavedGraphs();
+
+            let maxId = 0;
+
+            // Reconstruct Nodes
+            pipelineData.nodes.forEach(n => {
+                instantiateNode(n.type, n.x || '100px', n.y || '100px', n.id);
+
+                const nodeIndex = nodesData.findIndex(nd => nd.id === n.id);
+                if(nodeIndex !== -1) {
+                    nodesData[nodeIndex].config = n.config || {};
+
+                    if (n.type === 'telemetry' && n.config) {
+                        const el = document.getElementById(n.id);
+                        if(n.config.targetHardware) el.querySelector('.node-title').innerText = n.config.targetHardware;
+                        if(n.config.activeSensor) el.querySelector('.node-subtitle').innerText = `Sensor: ${n.config.activeSensor}`;
+                    }
+                }
+
+                // Prevent ID collisions
+                const idNum = parseInt(n.id.replace('node-', ''));
+                if(!isNaN(idNum) && idNum > maxId) maxId = idNum;
+            });
+
+            nodeIdCounter = maxId + 1;
+
+            // Reconstruct Wires
+            pipelineData.topology.forEach(t => {
+                const connId = `conn-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
+                const toHandle = t.targetHandle || 'in';
+
+                connections.push({
+                    id: connId,
+                    fromNode: t.source,
+                    fromHandle: t.trigger,
+                    toNode: t.target,
+                    toHandle: toHandle
+                });
+
+                const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                tempLine.id = connId;
+                if(t.trigger === 'out-true') tempLine.setAttribute('stroke', '#ef4444');
+                else tempLine.setAttribute('stroke', '#64748b');
+                tempLine.setAttribute('stroke-width', '2');
+                tempLine.setAttribute('fill', 'none');
+                tempLine.classList.add('wire-path');
+                svgLayer.appendChild(tempLine);
+            });
+
+            // Ensure DOM has calculated node sizes before redrawing lines
+            setTimeout(() => {
+                redrawAllConnections();
+            }, 50);
         }
 
         // ==========================================
@@ -1157,15 +1259,20 @@
             }
 
             const payload = {
+                id: 'graph-' + Date.now(),
                 version: "1.0",
                 platform: "Consentium EdgeNeuron",
                 title: titleInput,
                 timestamp: new Date().toISOString(),
-                nodes: nodesData,
+                nodes: nodesData.map(n => {
+                    const el = document.getElementById(n.id);
+                    return { ...n, x: el.style.left, y: el.style.top };
+                }),
                 topology: connections.map(c => ({
                     source: c.fromNode,
                     target: c.toNode,
-                    trigger: c.fromHandle
+                    trigger: c.fromHandle,
+                    targetHandle: c.toHandle
                 }))
             };
 
@@ -1188,15 +1295,72 @@
 
                 const data = await response.json();
                 alert(`Pipeline Deployed successfully! ID: ${data.pipeline_id}`);
+
+                fetchSavedGraphs();
                 closeDeployModal();
 
             } catch (error) {
-                console.error("Deploy Error:", error);
-                alert("Failed to deploy pipeline. Check console for details.");
+                console.warn("Backend not active. Saving to local storage instead.");
+
+                localPipelinesStore[payload.id] = payload;
+                savedGraphsList.push({
+                    id: payload.id,
+                    title: payload.title,
+                    timestamp: payload.timestamp
+                });
+
+                localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
+                localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+
+                updateSavedGraphsUI();
+                closeDeployModal();
+                alert("Pipeline saved to persistent local browser storage!");
             } finally {
                 deployBtn.innerText = originalText;
                 deployBtn.disabled = false;
             }
+        }
+
+        function storeGraph() {
+            if (!currentSelectedNodeId) return;
+
+            const chartType = document.getElementById('setting-chartType')?.value || 'Time-Series';
+
+            const payload = {
+                id: 'graph-' + Date.now(),
+                version: "1.0",
+                platform: "Consentium EdgeNeuron",
+                title: "Live Chart: " + chartType,
+                timestamp: new Date().toISOString(),
+                nodes: nodesData.map(n => {
+                    const el = document.getElementById(n.id);
+                    return { ...n, x: el.style.left, y: el.style.top };
+                }),
+                topology: connections.map(c => ({
+                    source: c.fromNode,
+                    target: c.toNode,
+                    trigger: c.fromHandle,
+                    targetHandle: c.toHandle
+                }))
+            };
+
+            localPipelinesStore[payload.id] = payload;
+            savedGraphsList.push({
+                id: payload.id,
+                title: payload.title,
+                timestamp: payload.timestamp
+            });
+
+            localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
+            localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+
+            updateSavedGraphsUI();
+
+            const panel = document.getElementById('saved-graphs-panel');
+            if (panel.classList.contains('translate-y-full')) {
+                toggleSavedGraphs();
+            }
+            alert("Pipeline saved to Stored Graphs!");
         }
 
         function clearCanvas(e) {
