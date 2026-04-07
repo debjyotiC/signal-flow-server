@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from os import environ
 from datetime import datetime, timezone
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 
@@ -43,47 +44,92 @@ def get_metadata():
 
     return jsonify(metadata)
 
+
+# --- 2. API to get the LIST of saved flows (Populates the bottom drawer) ---
+@app.route('/api/v1/pipelines', methods=['GET'])
+def get_all_pipelines():
+    try:
+        # Fetch all active pipelines, but only grab the title and deployment date to save bandwidth
+        cursor = signal_flow.find(
+            {"status": "active"},
+            {"title": 1, "deployedAt": 1}
+        ).sort("deployedAt", -1)  # Sort newest first
+
+        formatted_data = []
+        for doc in cursor:
+            formatted_data.append({
+                "id": str(doc["_id"]),
+                "title": doc.get("title", "Untitled Pipeline"),
+                # The frontend expects 'timestamp' to format the date correctly
+                "timestamp": doc.get("deployedAt", datetime.now(timezone.utc)).isoformat()
+            })
+
+        # Return the exact JSON structure your frontend fetchSavedGraphs() expects
+        return jsonify({
+            "status": "success",
+            "data": formatted_data
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching pipelines: {e}")
+        return jsonify({"status": "error", "message": "Internal server error"}), 500
+
+
+# --- 3. API to load a SPECIFIC flow (Draws the nodes and wires on canvas) ---
+@app.route('/api/v1/pipelines/<pipeline_id>', methods=['GET'])
+def get_single_pipeline(pipeline_id):
+    try:
+        # Search the database using the MongoDB ObjectId
+        pipeline = signal_flow.find_one({"_id": ObjectId(pipeline_id)})
+
+        if not pipeline:
+            return jsonify({"status": "error", "message": "Pipeline not found"}), 404
+
+        # Map the database document to the JSON structure your loadPipeline() function expects
+        formatted_pipeline = {
+            "id": str(pipeline["_id"]),
+            "title": pipeline.get("title"),
+            "version": pipeline.get("version"),
+            "platform": pipeline.get("platform"),
+            "nodes": pipeline.get("nodes", []),
+            "topology": pipeline.get("topology", []),
+            "timestamp": pipeline.get("deployedAt", datetime.now(timezone.utc)).isoformat()
+        }
+
+        return jsonify({
+            "status": "success",
+            "pipeline": formatted_pipeline
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching pipeline {pipeline_id}: {e}")
+        return jsonify({"status": "error", "message": "Invalid ID or server error"}), 500
+
+
+# --- 4. The Save Pipeline Route (From earlier) ---
 @app.route('/api/v1/pipelines', methods=['POST'])
 def save_pipeline():
     try:
         data = request.get_json()
 
-        user_id = get_user_id(USERNAME)
-
-        if not user_id:
-            return jsonify({"error": "User not found"}), 404
-
-        # Extract payload
-        nodes = data.get('nodes', [])
-        topology = data.get('topology', [])
-
-        if not nodes:
-            return jsonify({"status": "error", "message": "Cannot save an empty pipeline."}), 400
-
-        # Construct the document
         pipeline_doc = {
             "title": data.get('title', 'Untitled SignalFlow Graph'),
             "version": data.get('version', '1.0'),
             "platform": data.get('platform', 'Consentium EdgeNeuron'),
-            "nodes": nodes,
-            "topology": topology,
+            "nodes": data.get('nodes', []),
+            "topology": data.get('topology', []),
             "deployedAt": datetime.now(timezone.utc),
-            "status": "active",
-            "userId": user_id
+            "status": "active"
         }
 
-        # Insert into MongoDB
         result = signal_flow.insert_one(pipeline_doc)
 
         return jsonify({
             "status": "success",
-            "message": "Pipeline deployed successfully",
             "pipeline_id": str(result.inserted_id)
         }), 201
 
     except Exception as e:
-        print(f"Error saving pipeline: {e}")
-        return jsonify({"status": "error", "message": "Internal server error"}), 500
-
+        return jsonify({"status": "error", "message": str(e)}), 500
 if __name__ == "__main__":
     app.run(debug=True, port=5050)
