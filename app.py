@@ -131,5 +131,21 @@ def save_pipeline():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+# --- 5. Run flow ---
+@app.route('/api/v1/pipelines/run', methods=['POST'])
+def run_pipeline():
+    try:
+        data = request.get_json()
+        print(data)
+
+        return jsonify({
+            "status": "success",
+            "pipeline_id": str(data["pipeline_id"]),
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5050)

@@ -6,6 +6,7 @@
     <title>SignalFlow | Consentium IoT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Base Canvas Styles */
         .canvas-bg {
             background-color: #f8fafc;
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
@@ -19,6 +20,7 @@
         .hidden-panel { display: none !important; }
         .drag-over { background-color: #f1f5f9; border: 2px dashed #cbd5e1; }
 
+        /* Wiring Handles */
         .connection-handle {
             transition: transform 0.1s ease-in-out, background-color 0.1s;
         }
@@ -31,6 +33,7 @@
         .handle-out { z-index: 20; }
         .handle-in { z-index: 20; }
 
+        /* SVG Paths */
         .wire-path {
             pointer-events: stroke;
             cursor: pointer;
@@ -39,6 +42,18 @@
         .wire-path:hover {
             stroke-width: 4px;
             stroke: #ef4444 !important;
+        }
+
+        /* Run Flow Animation */
+        @keyframes flow-animation {
+            from { stroke-dashoffset: 20; }
+            to { stroke-dashoffset: 0; }
+        }
+        .wire-flowing {
+            stroke-dasharray: 10, 5 !important;
+            animation: flow-animation 0.5s linear infinite;
+            stroke: #10b981 !important; /* Bright green */
+            stroke-width: 3px !important;
         }
     </style>
 </head>
@@ -94,9 +109,9 @@
             <div id="canvas" class="flex-1 canvas-bg relative overflow-hidden transition-colors duration-200">
 
                 <div class="absolute top-4 left-4 z-10 flex gap-2 items-center">
-                    <button class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-                        Run Flow
+                    <button id="run-btn" onclick="toggleRunFlow()" class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors w-32 justify-center">
+                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                        <span>Run Flow</span>
                     </button>
                     <button onclick="exportPipeline()" id="deploy-btn" class="px-3 py-1.5 bg-indigo-600 shadow-sm rounded-md text-sm font-medium text-white hover:bg-indigo-700">Deploy</button>
                     <button class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-1 ml-4" onclick="clearCanvas(event)">
@@ -272,8 +287,9 @@
         let nodesData = [];
         let connections = [];
         let currentSelectedNodeId = null;
+        let currentPipelineId = null;
 
-        // Connect directly to the browser's persistent storage
+        // Connect directly to the browser's persistent storage (Fallback logic)
         let savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
         let localPipelinesStore = JSON.parse(localStorage.getItem('signalflow_pipelines_store')) || {};
 
@@ -804,6 +820,13 @@
                     </div>
                     <div class="space-y-4">
                         <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Average Type</label>
                             <select id="setting-avgType" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
                                 <option ${config.avgType === 'Simple (SMA)' ? 'selected' : ''}>Simple (SMA)</option>
@@ -829,6 +852,13 @@
                         </div>
                     </div>
                     <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Rolling Window Size</label>
                             <p class="text-[10px] text-slate-500 mb-2">Number of historical points for mean/std dev.</p>
@@ -856,6 +886,10 @@
                         <div><h2 class="text-sm font-bold text-slate-900">Logical Threshold</h2><p class="text-[10px] text-slate-500">Simple condition routing</p></div>
                     </div>
                     <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Metric</label>
+                            <input type="text" id="setting-metric" value="${config.metric || 'Speed'}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm">
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Condition</label>
                             <select id="setting-operator" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
@@ -923,6 +957,13 @@
                         </div>
                     </div>
                     <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Metric</label>
+                            <select id="setting-metric" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option ${config.metric === 'Speed (rpm)' ? 'selected' : ''}>Speed (rpm)</option>
+                                <option ${config.metric === 'Vibration (hz)' ? 'selected' : ''}>Vibration (hz)</option>
+                            </select>
+                        </div>
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-md">
                             <label class="block text-xs font-semibold text-slate-800 mb-3">Model Parameters</label>
                             <div class="grid grid-cols-3 gap-3">
@@ -998,13 +1039,6 @@
                             <input type="checkbox" id="setting-showThresholds" ${config.showThresholds !== false ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
                             <span class="text-xs font-semibold text-slate-700">Overlay Anomaly Thresholds</span>
                         </label>
-
-                        <div class="mt-6 pt-4 border-t border-slate-200">
-                            <button onclick="storeGraph()" class="w-full py-2 px-4 border border-indigo-200 rounded-md shadow-sm text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                                Save to Stored Graphs
-                            </button>
-                        </div>
                     </div>`;
             }
         }
@@ -1148,7 +1182,7 @@
                 alert("Pipeline data could not be found.");
                 return;
             }
-
+            currentPipelineId = pipelineId;
             // Clean Slate
             clearCanvas(new Event('click'));
             emptyState.style.display = 'none';
@@ -1269,6 +1303,9 @@
                 if (!response.ok) throw new Error('Deployment failed');
 
                 const data = await response.json();
+
+                currentPipelineId = data.pipeline_id;
+
                 alert(`Pipeline Deployed successfully! ID: ${data.pipeline_id}`);
 
                 fetchSavedGraphs();
@@ -1284,6 +1321,8 @@
                     timestamp: payload.timestamp
                 });
 
+                currentPipelineId = payload.id;
+
                 localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
                 localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
 
@@ -1296,56 +1335,101 @@
             }
         }
 
-        function storeGraph() {
-            if (!currentSelectedNodeId) return;
-
-            const chartType = document.getElementById('setting-chartType')?.value || 'Time-Series';
-
-            const payload = {
-                id: 'graph-' + Date.now(),
-                version: "1.0",
-                platform: "Consentium EdgeNeuron",
-                title: "Live Chart: " + chartType,
-                timestamp: new Date().toISOString(),
-                nodes: nodesData.map(n => {
-                    const el = document.getElementById(n.id);
-                    return { ...n, x: el.style.left, y: el.style.top };
-                }),
-                topology: connections.map(c => ({
-                    source: c.fromNode,
-                    target: c.toNode,
-                    trigger: c.fromHandle,
-                    targetHandle: c.toHandle
-                }))
-            };
-
-            localPipelinesStore[payload.id] = payload;
-            savedGraphsList.push({
-                id: payload.id,
-                title: payload.title,
-                timestamp: payload.timestamp
-            });
-
-            localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
-            localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
-
-            updateSavedGraphsUI();
-
-            const panel = document.getElementById('saved-graphs-panel');
-            if (panel.classList.contains('translate-y-full')) {
-                toggleSavedGraphs();
-            }
-            alert("Pipeline saved to Stored Graphs!");
-        }
-
         function clearCanvas(e) {
-            e.stopPropagation();
+            if (e) e.stopPropagation();
             document.querySelectorAll('.node-card').forEach(node => node.remove());
             svgLayer.innerHTML = '';
             connections = [];
             nodesData = [];
+            currentPipelineId = null; // <--- RESET THE ID
             emptyState.style.display = 'flex';
             showLibraryPanel();
+            if(isFlowRunning) toggleRunFlow();
+        }
+
+        // ==========================================
+        // RUN FLOW EXECUTION
+        // ==========================================
+        let isFlowRunning = false;
+
+        async function toggleRunFlow() {
+            const runBtn = document.getElementById('run-btn');
+            const btnText = runBtn.querySelector('span');
+
+            // Validate: Ensure the pipeline has been deployed/saved first
+            if (!currentPipelineId) {
+                alert("Please Deploy or Load this pipeline before running it. The backend needs an ID.");
+                return;
+            }
+
+            if (isFlowRunning) {
+                // --- STOP THE FLOW ---
+                isFlowRunning = false;
+
+                // Update UI
+                btnText.innerText = "Run Flow";
+                runBtn.classList.replace('bg-red-50', 'bg-white');
+                runBtn.classList.replace('text-red-700', 'text-slate-600');
+                runBtn.innerHTML = `
+                    <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                    <span>Run Flow</span>
+                `;
+
+                // Stop Wire Animations
+                document.querySelectorAll('.wire-path').forEach(path => {
+                    path.classList.remove('wire-flowing');
+                });
+
+                // Send STOP command to backend
+                const payload = { action: "stop", pipeline_id: currentPipelineId };
+
+                try {
+                    await fetch('/api/v1/pipelines/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    console.log("Flow stopped on backend.", payload);
+                } catch (err) {
+                    console.log("Offline mode: Flow stopped visually.", payload);
+                }
+
+            } else {
+                // --- START THE FLOW ---
+                isFlowRunning = true;
+
+                // Update UI
+                btnText.innerText = "Stop Flow";
+                runBtn.classList.replace('bg-white', 'bg-red-50');
+                runBtn.classList.replace('text-slate-600', 'text-red-700');
+                runBtn.innerHTML = `
+                    <svg class="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    <span>Stop Flow</span>
+                `;
+
+                // Start Wire Animations
+                document.querySelectorAll('.wire-path').forEach(path => {
+                    path.classList.add('wire-flowing');
+                });
+
+                // Send START command to backend
+                const payload = { action: "start", pipeline_id: currentPipelineId };
+
+                try {
+                    console.log("Sending run command to backend...", payload);
+                    const response = await fetch('/api/v1/pipelines/run', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if(response.ok) {
+                        const data = await response.json();
+                        console.log("Backend stream started:", data);
+                    }
+                } catch (err) {
+                    console.log("Offline mode: Flow started visually.", payload);
+                }
+            }
         }
     </script>
 </body>
