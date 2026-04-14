@@ -111,11 +111,11 @@ def get_single_pipeline(pipeline_id):
 def save_pipeline():
     try:
         data = request.get_json()
+        user_id = get_user_id(USERNAME)
 
         pipeline_doc = {
             "title": data.get('title', 'Untitled SignalFlow Graph'),
-            "version": data.get('version', '1.0'),
-            "platform": data.get('platform', 'Consentium EdgeNeuron'),
+            "userId": user_id,
             "nodes": data.get('nodes', []),
             "topology": data.get('topology', []),
             "deployedAt": datetime.now(timezone.utc),
@@ -137,7 +137,9 @@ def save_pipeline():
 def run_pipeline():
     try:
         data = request.get_json()
-        print(data)
+        flow_details = signal_flow.find_one({'_id': ObjectId(data['pipeline_id'])})
+
+        print(flow_details)
 
         return jsonify({
             "status": "success",
