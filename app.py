@@ -99,6 +99,8 @@ def get_single_pipeline(pipeline_id):
             "timestamp": pipeline.get("deployedAt", datetime.now(timezone.utc)).isoformat()
         }
 
+        print(formatted_pipeline)
+
         return jsonify({
             "status": "success",
             "pipeline": formatted_pipeline

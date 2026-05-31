@@ -364,6 +364,12 @@
         // ==========================================
         function showHomeView(e) {
             if (e) e.preventDefault();
+            
+            // Clear flow_id from URL
+            if (window.location.search.includes('flow_id=')) {
+                window.history.pushState({}, '', window.location.pathname);
+            }
+
             document.getElementById('home-view').classList.replace('hidden', 'flex');
             document.getElementById('signalflow-view').classList.replace('flex', 'hidden');
 
@@ -1430,6 +1436,19 @@
                         const el = document.getElementById(n.id);
                         if(n.config.targetHardware) el.querySelector('.node-title').innerText = n.config.targetHardware;
                         if(n.config.activeSensor) el.querySelector('.node-subtitle').innerText = `Sensor: ${n.config.activeSensor}`;
+                    } else if (n.type === 'edgecommand' && n.config) {
+                        const keyEl = document.getElementById(`${n.id}-display-key`);
+                        const chEl = document.getElementById(`${n.id}-display-channel`);
+                        const actEl = document.getElementById(`${n.id}-display-action`);
+                        if (keyEl) keyEl.innerText = n.config.boardKey ? n.config.boardKey : 'Unconfigured';
+                        if (chEl) chEl.innerText = `CH ${n.config.channel || '0'}`;
+                        if (actEl) {
+                            if (n.config.actionType === 'Value') {
+                                actEl.innerText = n.config.actionValue ? `Val: ${n.config.actionValue}` : 'Val: -';
+                            } else {
+                                actEl.innerText = n.config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
+                            }
+                        }
                     }
                 }
 
@@ -1585,10 +1604,10 @@
             svgLayer.innerHTML = '';
             connections = [];
             nodesData = [];
+            if(isFlowRunning) toggleRunFlow();
             currentPipelineId = null; // <--- RESET THE ID
             emptyState.style.display = 'flex';
             showLibraryPanel();
-            if(isFlowRunning) toggleRunFlow();
 
             // Remove the flow_id from the URL when the canvas is cleared
             window.history.pushState({}, '', window.location.pathname);
