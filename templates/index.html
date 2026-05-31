@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignalFlow | Consentium IoT</title>
+    <title>Consentium IoT - Signal Flow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Base Canvas Styles */
@@ -70,15 +70,25 @@
             <div>
                 <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Monitor</div>
                 <div class="space-y-1">
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors">
+                    <a href="#" id="nav-home" onclick="showHomeView(event)" class="flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors font-medium border-l-2 border-indigo-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> Home
                     </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> My Dashboards
                     </a>
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors mt-2 font-medium border-l-2 border-indigo-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> SignalFlow
-                    </a>
+
+                    <div>
+                        <a href="#" id="nav-signalflow" onclick="openFlowModal(event)" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 cursor-pointer rounded-md transition-colors mt-2 font-medium border-l-2 border-transparent">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Signal Flow
+                        </a>
+                        <div id="sidebar-saved-flows" class="mt-2 ml-5 pl-3 border-l border-slate-200 space-y-1">
+                            <div class="text-[10px] text-slate-400 py-1 flex items-center gap-2">
+                                <svg class="animate-spin w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             <div>
@@ -92,11 +102,11 @@
         </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col min-w-0">
+    <main class="flex-1 flex flex-col min-w-0 bg-white">
 
         <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10">
-            <div class="flex items-center text-sm text-slate-500">
-                Home <span class="mx-2">/</span> <span class="text-slate-800 font-medium">SignalFlow</span>
+            <div class="flex items-center text-sm text-slate-500" id="header-breadcrumbs">
+                Home
             </div>
             <div class="flex items-center gap-4">
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200 text-indigo-600 bg-indigo-50 uppercase tracking-wide">Pro</span>
@@ -104,16 +114,23 @@
             </div>
         </header>
 
-        <div class="flex-1 flex overflow-hidden relative">
+        <div id="home-view" class="flex-1 flex flex-col items-center justify-center">
+            <div class="text-center text-slate-400">
+                <svg class="w-16 h-16 mx-auto mb-4 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <h2 class="text-xl font-medium text-slate-500">Welcome to Consentium IoT</h2>
+                <p class="text-sm mt-2">Select a module from the sidebar to begin.</p>
+            </div>
+        </div>
+
+        <div id="signalflow-view" class="hidden flex-1 overflow-hidden relative">
 
             <div id="canvas" class="flex-1 canvas-bg relative overflow-hidden transition-colors duration-200">
-
                 <div class="absolute top-4 left-4 z-10 flex gap-2 items-center">
                     <button id="run-btn" onclick="toggleRunFlow()" class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors w-32 justify-center">
                         <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                         <span>Run Flow</span>
                     </button>
-                    <button onclick="exportPipeline()" id="deploy-btn" class="px-3 py-1.5 bg-indigo-600 shadow-sm rounded-md text-sm font-medium text-white hover:bg-indigo-700">Deploy</button>
+                    <button onclick="saveCurrentFlow()" id="save-btn" class="px-3 py-1.5 bg-indigo-600 shadow-sm rounded-md text-sm font-medium text-white hover:bg-indigo-700">Save Flow</button>
                     <button class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-1 ml-4" onclick="clearCanvas(event)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Clear
                     </button>
@@ -129,25 +146,6 @@
 
                 <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 px-4 py-2 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm rounded-full pointer-events-none hidden md:block">
                     <span class="text-xs text-slate-500"><span class="font-bold text-slate-700">Tip:</span> Double-click a wire to delete it.</span>
-                </div>
-
-                <button id="saved-graphs-toggle" onclick="toggleSavedGraphs(event)" class="absolute bottom-6 right-6 z-30 px-4 py-2 bg-white border border-slate-200 shadow-md rounded-full text-sm font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 transition-all flex items-center gap-2 hidden">
-                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2h-2a2 2 0 01-2-2z"></path></svg>
-                    Stored Graphs (<span id="saved-graph-count">0</span>)
-                </button>
-
-                <div id="saved-graphs-panel" class="absolute bottom-0 left-0 w-full bg-white border-t border-slate-200 transition-transform duration-300 transform translate-y-full z-40 flex flex-col shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]" style="height: 280px;" onclick="event.stopPropagation()">
-                    <div class="h-10 flex items-center justify-between px-4 border-b border-slate-100 bg-slate-50 shrink-0">
-                        <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                            Stored Visualizations
-                        </div>
-                        <button onclick="toggleSavedGraphs(event)" class="text-slate-400 hover:text-slate-600 p-1">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-                    <div id="saved-graphs-container" class="flex-1 overflow-x-auto p-4 flex gap-4 bg-slate-50/50 items-center">
-                        </div>
                 </div>
             </div>
 
@@ -170,14 +168,8 @@
                         </div>
 
                         <div>
-                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Analytics & EdgeNeuron AI</div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Analytics</div>
                             <div class="grid grid-cols-2 gap-2">
-                                <div draggable="true" ondragstart="handleDragStart(event, 'gemini')" class="border border-slate-200 rounded-md p-2 hover:border-indigo-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
-                                    <div class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                                    </div>
-                                    <span class="text-[11px] font-medium text-slate-700">Gemini LLM</span>
-                                </div>
                                 <div draggable="true" ondragstart="handleDragStart(event, 'movingaverage')" class="border border-slate-200 rounded-md p-2 hover:border-cyan-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
                                     <div class="w-6 h-6 rounded bg-cyan-50 text-cyan-600 flex items-center justify-center">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -220,13 +212,13 @@
                         </div>
 
                         <div>
-                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Outputs & Debug</div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">Outputs & Control</div>
                             <div class="grid grid-cols-2 gap-2">
-                                <div draggable="true" ondragstart="handleDragStart(event, 'livechart')" class="border border-slate-200 rounded-md p-2 hover:border-pink-400 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all border-l-4 border-l-pink-400">
-                                    <div class="w-6 h-6 rounded bg-pink-50 text-pink-600 flex items-center justify-center">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg>
+                                <div draggable="true" ondragstart="handleDragStart(event, 'edgecommand')" class="border border-slate-200 rounded-md p-2 hover:border-fuchsia-500 hover:shadow-sm cursor-grab bg-white flex flex-col items-center text-center gap-1 transition-all">
+                                    <div class="w-6 h-6 rounded bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                     </div>
-                                    <span class="text-[11px] font-bold text-slate-700">Live Chart</span>
+                                    <span class="text-[11px] font-bold text-slate-700">Hardware Relay</span>
                                 </div>
                             </div>
                         </div>
@@ -256,22 +248,88 @@
         </div>
     </main>
 
-    <div id="deploy-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-lg shadow-xl w-96 overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-800">Deploy Pipeline</h3>
-                <button onclick="closeDeployModal()" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+
+    <div id="flow-manager-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-[560px] flex flex-col relative overflow-hidden">
+            
+            <!-- Step 1: Select Flow -->
+            <div id="modal-step-1" class="flex flex-col h-full">
+                <!-- Header -->
+                <div class="px-8 pt-8 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-1">Select Flow</h2>
+                    <p class="text-slate-500 text-sm">Open an existing flow or create a new one.</p>
+                </div>
+                
+                <div class="px-8 pb-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="text" id="flow-search-input" class="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Search flows...">
+                    </div>
+                </div>
+
+                <div class="px-8 pb-6 flex-1 overflow-y-auto max-h-[50vh]">
+                    <!-- Create New Button -->
+                    <div onclick="showCreateFlowStep2()" class="flex items-center gap-4 p-4 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 hover:border-indigo-300 transition-colors mb-4">
+                        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 font-bold text-2xl">
+                            +
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-indigo-800 font-bold text-base">Create New Flow</span>
+                            <span class="text-indigo-600 text-sm">Start from scratch</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Saved flows list container -->
+                    <div id="modal-saved-flows-list" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-indigo-600"></div>
+                        <div class="w-2 h-2 rounded-full bg-slate-200"></div>
+                        <span class="text-xs text-slate-400 ml-1 font-semibold">Step 1 of 2</span>
+                    </div>
+                    <button onclick="closeFlowModal()" class="font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
+                </div>
             </div>
-            <div class="p-5">
-                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Pipeline Name</label>
-                <input type="text" id="pipeline-name-input" placeholder="e.g., Motor Vibration Analysis" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+
+            <!-- Step 2: Flow Details -->
+            <div id="modal-step-2" class="flex flex-col h-full hidden">
+                <div class="px-8 pt-8 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-1">Flow Details</h2>
+                    <p class="text-slate-500 text-sm">Provide a name and description for your new flow.</p>
+                </div>
+                
+                <div class="px-8 pb-6 space-y-5 flex-1 overflow-y-auto max-h-[50vh]">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Flow Name</label>
+                        <input type="text" id="new-flow-name" placeholder="e.g., Temperature Monitoring" class="w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Description (Optional)</label>
+                        <textarea id="new-flow-desc" placeholder="Briefly describe what this flow does..." rows="3" class="w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-slate-200 cursor-pointer" onclick="showCreateFlowStep1()"></div>
+                        <div class="w-2 h-2 rounded-full bg-indigo-600"></div>
+                        <span class="text-xs text-slate-400 ml-1 font-semibold">Step 2 of 2</span>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="showCreateFlowStep1()" class="font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
+                        <button onclick="confirmCreateNewFlow()" class="font-bold text-indigo-600 hover:text-indigo-800 transition-colors">Create</button>
+                    </div>
+                </div>
             </div>
-            <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
-                <button onclick="closeDeployModal()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-md hover:bg-slate-50 shadow-sm">Cancel</button>
-                <button onclick="confirmDeploy()" id="confirm-deploy-btn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 shadow-sm">Deploy Now</button>
-            </div>
+
         </div>
     </div>
 
@@ -288,6 +346,7 @@
         let connections = [];
         let currentSelectedNodeId = null;
         let currentPipelineId = null;
+        let pipelineToDelete = null;
 
         // Connect directly to the browser's persistent storage (Fallback logic)
         let savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
@@ -300,9 +359,47 @@
         let tempLine = null;
         let connectionStartHandle = null;
 
+        // ==========================================
+        // VIEW NAVIGATION LOGIC
+        // ==========================================
+        function showHomeView(e) {
+            if (e) e.preventDefault();
+            document.getElementById('home-view').classList.replace('hidden', 'flex');
+            document.getElementById('signalflow-view').classList.replace('flex', 'hidden');
+
+            // Update breadcrumbs
+            document.getElementById('header-breadcrumbs').innerHTML = 'Home';
+
+            // Update nav active states
+            document.getElementById('nav-home').className = "flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors font-medium border-l-2 border-indigo-600";
+            document.getElementById('nav-signalflow').className = "flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors mt-2 font-medium border-l-2 border-transparent";
+        }
+
+        function showSignalFlowView() {
+            document.getElementById('home-view').classList.replace('flex', 'hidden');
+            document.getElementById('signalflow-view').classList.replace('hidden', 'flex');
+
+            // Update breadcrumbs
+            document.getElementById('header-breadcrumbs').innerHTML = 'Home <span class="mx-2">/</span> <span class="text-slate-800 font-medium">SignalFlow</span>';
+
+            // Update nav active states
+            document.getElementById('nav-home').className = "flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors font-medium border-l-2 border-transparent";
+            document.getElementById('nav-signalflow').className = "flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors mt-2 font-medium border-l-2 border-indigo-600";
+        }
+
         // Initialize UI
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchSavedGraphs();
+        window.addEventListener('DOMContentLoaded', async () => {
+            await fetchSavedGraphs();
+
+            // Check URL for existing flow
+            const urlParams = new URLSearchParams(window.location.search);
+            const flowId = urlParams.get('flow_id');
+            if (flowId) {
+                loadPipeline(flowId);
+                showSignalFlowView();
+            } else {
+                showHomeView();
+            }
         });
 
         // ==========================================
@@ -364,20 +461,39 @@
                 </div>
             </div>`,
 
-        'gemini': (id) => `
-            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-indigo-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-                <button onclick="showSettingsPanel('${id}', 'gemini', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+        'edgecommand': (id) => `
+            <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-fuchsia-500 cursor-move" style="z-index: 10;">
                 <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                <div class="p-3 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+
+                <div class="flex justify-between items-center p-2 border-b border-slate-100">
+                    <div class="flex items-center gap-2 pointer-events-none">
+                        <div class="w-6 h-6 rounded bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h3 class="text-xs font-semibold text-slate-800">Hardware Relay</h3>
                     </div>
-                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Gemini Analysis</h3></div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="deleteNode('${id}', event)" class="text-slate-400 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        <button onclick="showSettingsPanel('${id}', 'edgecommand', event)" class="text-slate-400 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    </div>
                 </div>
-                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+
+                <div class="p-3 bg-slate-50 rounded-b-lg pointer-events-none">
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between">
+                            <span class="text-[10px] font-medium text-slate-500">Board Key</span>
+                            <span class="text-[10px] font-bold text-slate-800" id="${id}-display-key">Unconfigured</span>
+                        </div>
+                        <div class="flex justify-between mt-1 pt-1 border-t border-slate-200">
+                            <span class="text-[10px] font-medium text-slate-500">Channel</span>
+                            <span class="text-[10px] font-bold text-fuchsia-600" id="${id}-display-channel">CH 0</span>
+                        </div>
+                        <div class="flex justify-between mt-1 pt-1 border-t border-slate-200">
+                            <span class="text-[10px] font-medium text-slate-500">Action</span>
+                            <span class="text-[10px] font-bold text-slate-800" id="${id}-display-action">ON (1)</span>
+                        </div>
+                    </div>
+                </div>
             </div>`,
 
         'movingaverage': (id) => `
@@ -509,40 +625,7 @@
                 </div>
             </div>`,
 
-        'livechart': (id) => `
-            <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-pink-500 cursor-move" style="z-index: 10;">
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
 
-                <div class="flex justify-between items-center p-2 border-b border-slate-100">
-                    <div class="flex items-center gap-2 pointer-events-none">
-                        <div class="w-6 h-6 rounded bg-pink-50 text-pink-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg>
-                        </div>
-                        <h3 class="text-xs font-semibold text-slate-800">Live Chart</h3>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="deleteNode('${id}', event)" class="text-slate-400 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                        <button onclick="showSettingsPanel('${id}', 'livechart', event)" class="text-slate-400 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    </div>
-                </div>
-
-                <div class="p-2 bg-slate-900 rounded-b-lg pointer-events-none">
-                    <div class="flex justify-between items-center mb-2 px-1">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Stream Preview</span>
-                        <div class="flex gap-2">
-                            <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Raw</span>
-                            <span class="flex items-center gap-1 text-[8px] text-slate-300"><span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span> AI Output</span>
-                        </div>
-                    </div>
-                    <svg viewBox="0 0 100 35" class="w-full h-20 overflow-visible">
-                        <line x1="0" y1="10" x2="100" y2="10" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
-                        <line x1="0" y1="20" x2="100" y2="20" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
-                        <line x1="0" y1="30" x2="100" y2="30" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 2" />
-                        <polyline points="0,25 10,15 20,28 30,12 40,22 50,8 60,25 70,5 80,18 90,10 100,20" fill="none" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
-                        <path d="M0,22 C15,18 25,20 35,16 C45,12 55,18 65,14 C75,10 85,15 100,12" fill="none" stroke="#ec4899" stroke-width="1.5" />
-                    </svg>
-                </div>
-            </div>`
         };
 
         function instantiateNode(type, x, y, forcedId = null) {
@@ -782,36 +865,91 @@
                     console.error("Device fetch error:", err);
                     settingsContent.innerHTML = `<div class="p-4 text-xs text-red-500">Failed to load hardware. Please check your API connection.</div>`;
                 });
-            } else if (type === 'gemini') {
+            } else if (type === 'edgecommand') {
                 settingsContent.innerHTML = `
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg></div>
-                        <div><h2 class="text-sm font-bold text-slate-900">Gemini Analysis</h2><p class="text-[10px] text-slate-500">LLM-based data inference</p></div>
+                        <div class="w-10 h-10 rounded bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center border border-fuchsia-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Hardware Relay</h2><p class="text-[10px] text-slate-500">Issue boolean commands</p></div>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">API Key</label>
-                            <input type="password" id="setting-apiKey" placeholder="AIzaSy..." value="${config.apiKey || ''}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Board Key</label>
+                            <input type="text" id="setting-boardKey" placeholder="Enter board key..." value="${config.boardKey || ''}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
+                            <p class="text-[10px] text-slate-500 mt-1">Check available channels via <code class="bg-slate-100 px-1 rounded">/api/v1/hardware/channels</code></p>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Model</label>
-                            <select id="setting-model" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
-                                <option ${config.model === 'gemini-1.5-flash' ? 'selected' : ''}>gemini-1.5-flash</option>
-                                <option ${config.model === 'gemini-1.5-pro' ? 'selected' : ''}>gemini-1.5-pro</option>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Channel</label>
+                            <select id="setting-channel" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option value="0" ${config.channel === '0' ? 'selected' : ''}>Channel 0</option>
+                                <option value="1" ${config.channel === '1' ? 'selected' : ''}>Channel 1</option>
+                                <option value="2" ${config.channel === '2' ? 'selected' : ''}>Channel 2</option>
+                                <option value="3" ${config.channel === '3' ? 'selected' : ''}>Channel 3</option>
+                                <option value="4" ${config.channel === '4' ? 'selected' : ''}>Channel 4</option>
+                                <option value="5" ${config.channel === '5' ? 'selected' : ''}>Channel 5</option>
+                                <option value="6" ${config.channel === '6' ? 'selected' : ''}>Channel 6</option>
+                                <option value="7" ${config.channel === '7' ? 'selected' : ''}>Channel 7</option>
+                            </select>
+                            <div id="channel-status-msg" class="text-[10px] mt-1 text-slate-500"></div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Action Type</label>
+                            <select id="setting-actionType" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none" onchange="document.getElementById('action-value-container').style.display = this.value === 'Value' ? 'block' : 'none'; document.getElementById('action-boolean-container').style.display = this.value === 'Boolean' ? 'block' : 'none';">
+                                <option value="Boolean" ${config.actionType !== 'Value' ? 'selected' : ''}>Boolean</option>
+                                <option value="Value" ${config.actionType === 'Value' ? 'selected' : ''}>Value</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">System Prompt</label>
-                            <textarea id="setting-prompt" rows="4" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-xs font-mono resize-none focus:ring-1 focus:ring-indigo-500 outline-none" placeholder="Analyze this sensor data for anomalies...">${config.prompt || 'You are an IoT analysis assistant. Review the following telemetry data and output a JSON object containing "status" (normal/anomaly) and "reason".'}</textarea>
+                        <div id="action-boolean-container" style="display: ${config.actionType !== 'Value' ? 'block' : 'none'};">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Boolean State</label>
+                            <select id="setting-actionBoolean" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                                <option value="1" ${config.actionBoolean !== '0' ? 'selected' : ''}>ON (1)</option>
+                                <option value="0" ${config.actionBoolean === '0' ? 'selected' : ''}>OFF (0)</option>
+                            </select>
                         </div>
-                        <div class="pt-2 border-t border-slate-100">
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="block text-xs font-semibold text-slate-700">Temperature</label>
-                                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">${config.temperature || 0.2}</span>
-                            </div>
-                            <input type="range" id="setting-temperature" min="0" max="1" step="0.1" value="${config.temperature || 0.2}" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="this.previousElementSibling.querySelector('span').innerText = this.value">
+                        <div id="action-value-container" style="display: ${config.actionType === 'Value' ? 'block' : 'none'};">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Target Value</label>
+                            <input type="number" id="setting-actionValue" placeholder="e.g. 100" value="${config.actionValue || ''}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
                         </div>
                     </div>`;
+
+                const fetchEdgeChannels = async (key) => {
+                    const statusMsg = document.getElementById('channel-status-msg');
+                    const channelSelect = document.getElementById('setting-channel');
+                    if (!key) {
+                        statusMsg.innerText = "Please enter a board key to check channels.";
+                        return;
+                    }
+                    statusMsg.innerText = "Fetching channels...";
+                    statusMsg.className = "text-[10px] mt-1 text-indigo-500";
+                    try {
+                        const response = await fetch(`/api/v1/hardware/channels?board_key=${key}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (Array.isArray(data) && data.length > 0) {
+                                channelSelect.innerHTML = data.map(ch => `<option value="${ch}" ${config.channel === String(ch) ? 'selected' : ''}>Channel ${ch}</option>`).join('');
+                                statusMsg.innerText = "Channels updated from device.";
+                                statusMsg.className = "text-[10px] mt-1 text-green-500";
+                            } else {
+                                statusMsg.innerText = "No specific channels returned; using default 0-7.";
+                                statusMsg.className = "text-[10px] mt-1 text-slate-500";
+                            }
+                        } else {
+                            statusMsg.innerText = "Device API not found, using default channels 0-7.";
+                            statusMsg.className = "text-[10px] mt-1 text-amber-500";
+                        }
+                    } catch (e) {
+                        console.warn("Backend not active for channels", e);
+                        statusMsg.innerText = "API unreachable, using default channels 0-7.";
+                        statusMsg.className = "text-[10px] mt-1 text-amber-500";
+                    }
+                };
+
+                document.getElementById('setting-boardKey').addEventListener('change', (e) => {
+                    fetchEdgeChannels(e.target.value);
+                });
+                
+                if (config.boardKey) {
+                    fetchEdgeChannels(config.boardKey);
+                }
             } else if (type === 'movingaverage') {
                 settingsContent.innerHTML = `
                     <div class="flex items-center gap-3 mb-6">
@@ -987,34 +1125,7 @@
                         </div>
                         <div><label class="block text-xs font-semibold text-slate-700 mb-1">Seasonality Period (L)</label><input type="number" id="setting-period" value="${config.period || 12}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm"></div>
                     </div>`;
-            } else if (type === 'livechart') {
-                settingsContent.innerHTML = `
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded bg-pink-50 text-pink-600 flex items-center justify-center border border-pink-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18 M3 16l5-5 4 4 8-8"></path></svg></div>
-                        <div><h2 class="text-sm font-bold text-slate-900">Live Preview</h2><p class="text-[10px] text-slate-500">Real-time data visualization</p></div>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Chart Type</label>
-                            <select id="setting-chartType" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
-                                <option ${config.chartType === 'Time-Series Line' ? 'selected' : ''}>Time-Series Line</option>
-                                <option ${config.chartType === 'Scatter Plot (Anomalies)' ? 'selected' : ''}>Scatter Plot (Anomalies)</option>
-                                <option ${config.chartType === 'Bar (Aggregated)' ? 'selected' : ''}>Bar (Aggregated)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Y-Axis Scale</label>
-                            <select id="setting-yAxis" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm bg-white">
-                                <option ${config.yAxis === 'Auto-scale' ? 'selected' : ''}>Auto-scale</option>
-                                <option ${config.yAxis === 'Fixed (0 - 100)' ? 'selected' : ''}>Fixed (0 - 100)</option>
-                                <option ${config.yAxis === 'Logarithmic' ? 'selected' : ''}>Logarithmic</option>
-                            </select>
-                        </div>
-                        <label class="flex items-center gap-2 pt-2 cursor-pointer">
-                            <input type="checkbox" id="setting-showThresholds" ${config.showThresholds !== false ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
-                            <span class="text-xs font-semibold text-slate-700">Overlay Anomaly Thresholds</span>
-                        </label>
-                    </div>`;
+
             }
         }
 
@@ -1047,6 +1158,33 @@
 
                 if (titleEl) titleEl.innerText = config.targetHardware || 'Data Source';
                 if (subtitleEl) subtitleEl.innerText = config.activeSensor ? `Sensor: ${config.activeSensor}` : 'Unconfigured';
+            } else if (nodeType === 'edgecommand') {
+                const prevConfig = nodesData[nodeIndex].config || {};
+                const keyEl = nodeEl.querySelector(`#${nodesData[nodeIndex].id}-display-key`);
+                const chEl = nodeEl.querySelector(`#${nodesData[nodeIndex].id}-display-channel`);
+                const actEl = nodeEl.querySelector(`#${nodesData[nodeIndex].id}-display-action`);
+                if (keyEl) keyEl.innerText = config.boardKey ? config.boardKey : 'Unconfigured';
+                if (chEl) chEl.innerText = `CH ${config.channel || '0'}`;
+                if (actEl) {
+                    if (config.actionType === 'Value') {
+                        actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
+                    } else {
+                        actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
+                    }
+                }
+                
+                // Pass selected channel to the backend to update the entry
+                if (config.boardKey && config.channel) {
+                    fetch('/api/v1/hardware/channels/take', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            board_key: config.boardKey, 
+                            channel: parseInt(config.channel),
+                            previous_channel: prevConfig.channel ? parseInt(prevConfig.channel) : null
+                        })
+                    }).catch(err => console.warn("Failed to update channel assignment:", err));
+                }
             }
 
             showLibraryPanel();
@@ -1057,20 +1195,8 @@
         }
 
         // ==========================================
-        // 5. SAVED GRAPHS LOGIC (BOTTOM DRAWER)
+        // 5. SAVED GRAPHS LOGIC (SIDEBAR & MODAL)
         // ==========================================
-        function toggleSavedGraphs(e) {
-            if(e) e.stopPropagation();
-            const panel = document.getElementById('saved-graphs-panel');
-            if (panel.classList.contains('translate-y-full')) {
-                panel.classList.remove('translate-y-full');
-                panel.classList.add('translate-y-0');
-            } else {
-                panel.classList.remove('translate-y-0');
-                panel.classList.add('translate-y-full');
-            }
-        }
-
         async function fetchSavedGraphs() {
             try {
                 const response = await fetch('/api/v1/pipelines', {
@@ -1080,59 +1206,183 @@
                     const data = await response.json();
                     savedGraphsList = data.data || [];
 
-                    // Populate local store cache for quick loading
+                    // Sync the local store
                     savedGraphsList.forEach(graph => {
                         localPipelinesStore[graph.id] = graph;
                     });
+                    localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
+                    localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+                } else {
+                    throw new Error("Backend unavailable.");
                 }
             } catch(e) {
-                console.warn("Backend not active. Using local pipeline storage.", e);
+                console.warn("Using local pipeline storage.");
+                savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
+                localPipelinesStore = JSON.parse(localStorage.getItem('signalflow_pipelines_store')) || {};
             } finally {
                 updateSavedGraphsUI();
             }
         }
 
         function updateSavedGraphsUI() {
-            const container = document.getElementById('saved-graphs-container');
-            const toggleBtn = document.getElementById('saved-graphs-toggle');
-            const countSpan = document.getElementById('saved-graph-count');
-
-            countSpan.innerText = savedGraphsList.length;
+            const container = document.getElementById('sidebar-saved-flows');
 
             if (savedGraphsList.length > 0) {
-                toggleBtn.classList.remove('hidden');
                 let html = '';
                 savedGraphsList.forEach(g => {
-                    let displayTime = g.timestamp;
-                    try {
-                        const d = new Date(g.timestamp);
-                        if (!isNaN(d.getTime())) displayTime = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    } catch(e) {}
+                    const isActive = currentPipelineId === g.id;
+                    const activeClasses = isActive ? 'text-indigo-700 bg-indigo-50 font-medium' : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50';
 
                     html += `
-                        <div class="w-72 h-48 bg-white border border-slate-200 rounded-lg shadow-sm flex flex-col shrink-0 overflow-hidden group cursor-pointer relative" onclick="loadPipeline('${g.id}')">
-                            <div class="px-3 py-2 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                                <span class="text-xs font-bold text-slate-700">${g.title}</span>
-                                <span class="text-[10px] text-slate-400">${displayTime}</span>
-                            </div>
-                            <div class="flex-1 flex items-center justify-center bg-slate-900 relative">
-                                <svg viewBox="0 0 100 35" class="w-full h-full opacity-80 pt-2 px-2">
-                                    <polyline points="0,25 15,10 30,28 45,5 60,20 75,8 100,18" fill="none" stroke="#ec4899" stroke-width="1.5" />
-                                </svg>
-                            </div>
-                            <div class="absolute inset-0 bg-indigo-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-bold shadow-sm hover:bg-indigo-500 transition-colors flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    Load Flow
-                                </button>
-                            </div>
+                        <div class="group flex items-center justify-between text-xs rounded-md py-1.5 px-2 cursor-pointer transition-colors ${activeClasses}" onclick="loadPipeline('${g.id}'); showSignalFlowView();">
+                            <span class="truncate pr-2">${g.title}</span>
+                            <button onclick="deletePipeline('${g.id}', event)" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 p-1 rounded transition-all" title="Delete Flow">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
                         </div>`;
                 });
                 container.innerHTML = html;
             } else {
-                toggleBtn.classList.add('hidden');
-                container.innerHTML = `<div class="flex flex-col items-center justify-center w-full h-full text-slate-400"><p class="text-sm">No graphs saved yet.</p></div>`;
+                container.innerHTML = `<div class="text-[10px] text-slate-400 py-1 px-2">No flows saved yet.</div>`;
             }
+        }
+
+        function openFlowModal(e) {
+            if (e) e.preventDefault();
+            const modal = document.getElementById('flow-manager-modal');
+            const listContainer = document.getElementById('modal-saved-flows-list');
+            
+            // Reset to step 1
+            const step1 = document.getElementById('modal-step-1');
+            const step2 = document.getElementById('modal-step-2');
+            if(step1 && step2) {
+                step1.classList.remove('hidden');
+                step2.classList.add('hidden');
+            }
+            
+            listContainer.innerHTML = '';
+
+            // Ensure we are working with the freshest data
+            savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
+
+            if (savedGraphsList.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-6 text-slate-400 border border-slate-100 rounded-lg bg-slate-50">
+                        <svg class="w-8 h-8 mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        <span class="text-sm">No saved flows found.</span>
+                    </div>`;
+            } else {
+                savedGraphsList.forEach(flow => {
+                    const isCurrentlyActiveFlow = (flow.id === currentPipelineId);
+                    const isRunningStatus = isCurrentlyActiveFlow && isFlowRunning;
+
+                    const dateObj = flow.timestamp ? new Date(flow.timestamp) : new Date();
+                    const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                    const timeStr = dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
+                    // Green dot if running, Red dot if stopped
+                    const dotColor = isRunningStatus ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500';
+                    const tooltipText = isRunningStatus ? 'Running' : 'Stopped';
+
+                    listContainer.innerHTML += `
+                        <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer group" onclick="loadFlowFromModal('${flow.id}')">
+                            <div class="flex items-center gap-4 min-w-0 pr-4">
+                                <div class="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-500 shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                </div>
+                                <div class="flex flex-col gap-0.5 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-base font-bold text-slate-800 truncate">${flow.title}</span>
+                                        ${isCurrentlyActiveFlow ? `<span class="w-2 h-2 rounded-full ${dotColor}" title="${tooltipText}"></span>` : ''}
+                                    </div>
+                                    <span class="text-sm text-slate-500 truncate">
+                                        Last mod: ${dateStr} at ${timeStr}
+                                    </span>
+                                </div>
+                            </div>
+                            <button onclick="deletePipeline('${flow.id}', event); event.stopPropagation();" class="text-slate-300 hover:text-red-500 p-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+
+            // Setup search filter
+            const searchInput = document.getElementById('flow-search-input');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.oninput = function() {
+                    const query = searchInput.value.toLowerCase();
+                    const listItems = listContainer.querySelectorAll('.group');
+                    listItems.forEach(item => {
+                        const title = item.querySelector('.font-bold').innerText.toLowerCase();
+                        if (title.includes(query)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                };
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function showCreateFlowStep2() {
+            document.getElementById('modal-step-1').classList.add('hidden');
+            document.getElementById('modal-step-2').classList.remove('hidden');
+            document.getElementById('new-flow-name').value = '';
+            document.getElementById('new-flow-desc').value = '';
+            document.getElementById('new-flow-name').focus();
+        }
+
+        function showCreateFlowStep1() {
+            document.getElementById('modal-step-2').classList.add('hidden');
+            document.getElementById('modal-step-1').classList.remove('hidden');
+        }
+
+        async function confirmCreateNewFlow() {
+            const name = document.getElementById('new-flow-name').value.trim() || 'Untitled Pipeline';
+            const desc = document.getElementById('new-flow-desc').value.trim();
+            
+            try {
+                const response = await fetch('/api/v1/pipelines', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: name,
+                        description: desc,
+                        nodes: [],
+                        topology: []
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const newId = data.pipeline_id;
+                    
+                    loadPipeline(newId);
+                    showSignalFlowView();
+                    closeFlowModal();
+                    fetchSavedGraphs();
+                } else {
+                    alert("Failed to create flow");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error creating flow");
+            }
+        }
+
+        function loadFlowFromModal(id) {
+            loadPipeline(id);
+            showSignalFlowView();
+            closeFlowModal();
+        }
+
+        function closeFlowModal() {
+            document.getElementById('flow-manager-modal').classList.add('hidden');
         }
 
         async function loadPipeline(pipelineId) {
@@ -1165,7 +1415,6 @@
             currentPipelineId = pipelineId;
 
             emptyState.style.display = 'none';
-            toggleSavedGraphs();
 
             let maxId = 0;
 
@@ -1218,40 +1467,67 @@
             setTimeout(() => {
                 redrawAllConnections();
             }, 50);
+
+            // Update the URL and the sidebar UI to reflect the active selection
+            window.history.pushState({ id: pipelineId }, '', `?flow_id=${pipelineId}`);
+            updateSavedGraphsUI();
+        }
+
+        async function deletePipeline(pipelineId, event) {
+            event.stopPropagation();
+            if (window.confirm("Are you sure you want to delete this flow? This action cannot be undone and the pipeline will be permanently removed.")) {
+                try {
+                    const response = await fetch(`/api/v1/pipelines/${pipelineId}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
+                    });
+
+                    if (response.ok) {
+                        executeDeletionCleanup(pipelineId);
+                    } else {
+                        alert("Failed to delete the pipeline from the server.");
+                    }
+                } catch (error) {
+                    console.warn("Backend not active, deleting locally.", error);
+                    executeDeletionCleanup(pipelineId);
+                }
+            }
+        }
+
+        function executeDeletionCleanup(pipelineId) {
+            savedGraphsList = savedGraphsList.filter(g => g.id !== pipelineId);
+            delete localPipelinesStore[pipelineId];
+
+            localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
+            localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+
+            if (currentPipelineId === pipelineId) {
+                clearCanvas(new Event('click'));
+            } else {
+                updateSavedGraphsUI();
+            }
+
+            const flowModal = document.getElementById('flow-manager-modal');
+            if (flowModal && !flowModal.classList.contains('hidden')) {
+                openFlowModal(null);
+            }
         }
 
         // ==========================================
         // EXPORT & UTILS
         // ==========================================
-        function exportPipeline() {
+        async function saveCurrentFlow() {
             if (nodesData.length === 0) {
-                alert("Cannot deploy an empty workspace.");
+                alert("Cannot save an empty workspace.");
                 return;
             }
-            const modal = document.getElementById('deploy-modal');
-            const input = document.getElementById('pipeline-name-input');
-            input.value = '';
-            modal.classList.remove('hidden');
-            input.focus();
-        }
-
-        function closeDeployModal() {
-            document.getElementById('deploy-modal').classList.add('hidden');
-        }
-
-        async function confirmDeploy() {
-            const titleInput = document.getElementById('pipeline-name-input').value.trim();
-            if (!titleInput) {
-                alert("Please enter a pipeline name.");
+            if (!currentPipelineId) {
+                alert("No active flow to save. Create one from the Flow Manager first.");
                 return;
             }
 
             const payload = {
-                id: 'graph-' + Date.now(),
-                version: "1.0",
-                platform: "Consentium EdgeNeuron",
-                title: titleInput,
-                timestamp: new Date().toISOString(),
+                pipeline_id: currentPipelineId,
                 nodes: nodesData.map(n => {
                     const el = document.getElementById(n.id);
                     return { ...n, x: el.style.left, y: el.style.top };
@@ -1264,10 +1540,10 @@
                 }))
             };
 
-            const deployBtn = document.getElementById('confirm-deploy-btn');
-            const originalText = deployBtn.innerText;
-            deployBtn.innerText = "Deploying...";
-            deployBtn.disabled = true;
+            const saveBtn = document.getElementById('save-btn');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = "Saving...";
+            saveBtn.disabled = true;
 
             try {
                 const response = await fetch('/api/v1/pipelines', {
@@ -1279,38 +1555,27 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error('Deployment failed');
-
+                if (!response.ok) throw new Error('Save failed');
+                
                 const data = await response.json();
-
-                currentPipelineId = data.pipeline_id;
-
-                alert(`Pipeline Deployed successfully! ID: ${data.pipeline_id}`);
-
+                
+                // Show a quick success toast/alert
+                alert("Flow saved successfully!");
+                
+                // Refresh list if needed
                 fetchSavedGraphs();
-                closeDeployModal();
-
             } catch (error) {
-                console.warn("Backend not active. Saving to local storage instead.");
-
-                localPipelinesStore[payload.id] = payload;
-                savedGraphsList.push({
-                    id: payload.id,
-                    title: payload.title,
-                    timestamp: payload.timestamp
-                });
-
-                currentPipelineId = payload.id;
-
+                console.warn("Backend not active. Saving to local storage instead.", error);
+                
+                if (localPipelinesStore[currentPipelineId]) {
+                    localPipelinesStore[currentPipelineId].nodes = payload.nodes;
+                    localPipelinesStore[currentPipelineId].topology = payload.topology;
+                }
                 localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
-                localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
-
-                updateSavedGraphsUI();
-                closeDeployModal();
-                alert("Pipeline saved to persistent local browser storage!");
+                alert("Flow saved locally.");
             } finally {
-                deployBtn.innerText = originalText;
-                deployBtn.disabled = false;
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
             }
         }
 
@@ -1324,6 +1589,10 @@
             emptyState.style.display = 'flex';
             showLibraryPanel();
             if(isFlowRunning) toggleRunFlow();
+
+            // Remove the flow_id from the URL when the canvas is cleared
+            window.history.pushState({}, '', window.location.pathname);
+            updateSavedGraphsUI();
         }
 
         // ==========================================
