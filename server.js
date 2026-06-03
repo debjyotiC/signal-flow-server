@@ -56,7 +56,10 @@ app.get('/api/devices', async (req, res) => {
             const sensorDoc = await sensors.findOne({ boardKey: boardKey });
             const sensorList = sensorDoc && sensorDoc.sensorData ? sensorDoc.sensorData : [];
             const sensorNames = sensorList.map(s => s.info ? s.info.split('/')[0] : "");
-            metadata[boardName] = sensorNames;
+            metadata[boardName] = {
+                key: boardKey,
+                sensors: sensorNames
+            };
         }
 
         res.json(metadata);

@@ -822,9 +822,14 @@
                     const deviceOptions = deviceNames.map(dev =>
                         `<option value="${dev}" ${activeDeviceName === dev ? 'selected' : ''}>${dev}</option>`
                     ).join('');
+                    
+                    const getBoardKey = (deviceName) => {
+                        return (payload[deviceName] && payload[deviceName].key) || '';
+                    };
 
                     const generateSensorHTML = (deviceName) => {
-                        const sensors = payload[deviceName] || [];
+                        const deviceObj = payload[deviceName] || {};
+                        const sensors = deviceObj.sensors || [];
                         if (sensors.length === 0) return '<div class="p-3 text-xs text-slate-500">No sensors found.</div>';
 
                         return sensors.map((sensor, index) => {
@@ -853,6 +858,7 @@
                                 <select id="setting-targetHardware" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
                                     ${deviceOptions}
                                 </select>
+                                <input type="hidden" id="setting-boardKey" value="${getBoardKey(activeDeviceName)}">
                             </div>
                             <div class="pt-2 border-t border-slate-100">
                                 <label class="block text-xs font-semibold text-slate-700 mb-2">Active Sensors</label>
@@ -863,7 +869,9 @@
                         </div>`;
 
                     document.getElementById('setting-targetHardware').addEventListener('change', (e) => {
-                        document.getElementById('sensor-container').innerHTML = generateSensorHTML(e.target.value);
+                        const newDevice = e.target.value;
+                        document.getElementById('sensor-container').innerHTML = generateSensorHTML(newDevice);
+                        document.getElementById('setting-boardKey').value = getBoardKey(newDevice);
                     });
 
                 })
@@ -1548,7 +1556,25 @@
                 pipeline_id: currentPipelineId,
                 nodes: nodesData.map(n => {
                     const el = document.getElementById(n.id);
-                    return { ...n, x: el.style.left, y: el.style.top };
+                    const nodeCopy = { ...n, x: el.style.left, y: el.style.top };
+                    
+                    if (nodeCopy.type === 'threshold') {
+                        nodeCopy.config = nodeCopy.config || {};
+                        const incomingConn = connections.find(c => c.toNode === nodeCopy.id && c.toHandle === 'in');
+                        if (incomingConn) {
+                            const sourceNode = nodesData.find(sn => sn.id === incomingConn.fromNode);
+                            if (sourceNode) {
+                                if (sourceNode.type === 'telemetry') {
+                                    nodeCopy.config.inputKey = 'sensor_value';
+                                } else if (sourceNode.type === 'movingaverage') {
+                                    nodeCopy.config.inputKey = 'moving_average';
+                                } else if (sourceNode.type === 'zscore') {
+                                    nodeCopy.config.inputKey = 'z_score';
+                                }
+                            }
+                        }
+                    }
+                    return nodeCopy;
                 }),
                 topology: connections.map(c => ({
                     source: c.fromNode,

@@ -41,7 +41,10 @@ def get_metadata():
         sensor_doc = sensors.find_one({"boardKey": board_key})
         sensor_list = sensor_doc.get("sensorData", []) if sensor_doc else []
         sensor_names = [s.get("info", "").split("/")[0] for s in sensor_list]
-        metadata[board_name] = sensor_names
+        metadata[board_name] = {
+            "key": board_key,
+            "sensors": sensor_names
+        }
 
     return jsonify(metadata)
 
@@ -98,8 +101,6 @@ def get_single_pipeline(pipeline_id):
             "topology": pipeline.get("topology", []),
             "timestamp": pipeline.get("deployedAt", datetime.now(timezone.utc)).isoformat()
         }
-
-        print(formatted_pipeline)
 
         return jsonify({
             "status": "success",
