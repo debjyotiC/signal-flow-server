@@ -1552,6 +1552,7 @@
             }
 
             // 1. Define a global mapping of what key each node type outputs
+            // Now accepts the sourceNode and the handle it is outputting from
             const outputKeyMap = {
                 'telemetry': () => 'sensor_value',
                 'movingaverage': () => 'moving_average',
@@ -1559,7 +1560,7 @@
                 'kalman': () => 'kalman_filtered',
                 'holtwinters': () => 'hw_smoothed',
                 'arima': () => 'arima_forecast',
-                'threshold': () => 'threshold_match',
+                'threshold': (node, handle) => handle === 'out-false' ? 'threshold_nomatch' : 'threshold_match',
                 'edgecommand': () => 'relay_status',
                 'alert': () => 'alert_sent'
             };
@@ -1580,8 +1581,9 @@
                         const sourceNode = nodesData.find(sn => sn.id === incomingConn.fromNode);
 
                         // 3. Dynamically assign the input_key based on the parent's output profile
+                        // We pass incomingConn.fromHandle so the map knows exactly which port was used
                         if (sourceNode && outputKeyMap[sourceNode.type]) {
-                            nodeCopy.config.input_key = outputKeyMap[sourceNode.type](sourceNode);
+                            nodeCopy.config.input_key = outputKeyMap[sourceNode.type](sourceNode, incomingConn.fromHandle);
                         } else {
                             // Fallback for unknown node types
                             nodeCopy.config.input_key = 'default_payload';
