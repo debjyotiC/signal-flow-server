@@ -12,10 +12,10 @@
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 24px 24px;
         }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
         .node-card { position: absolute; user-select: none; }
         .hidden-panel { display: none !important; }
         .drag-over { background-color: #f1f5f9; border: 2px dashed #cbd5e1; }
@@ -52,14 +52,14 @@
         .wire-flowing {
             stroke-dasharray: 10, 5 !important;
             animation: flow-animation 0.5s linear infinite;
-            stroke: #10b981 !important; /* Bright green */
+            stroke: #10b981 !important;
             stroke-width: 3px !important;
         }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex font-sans text-slate-800 bg-[#f8f9fc]">
 
-    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 shadow-sm">
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col z-30 shrink-0 shadow-sm relative">
         <div class="h-16 flex items-center px-6 border-b border-slate-100">
             <div class="flex items-center gap-2 text-indigo-700 font-bold text-lg">
                 <svg class="w-6 h-6 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -70,25 +70,15 @@
             <div>
                 <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-3">Monitor</div>
                 <div class="space-y-1">
-                    <a href="#" id="nav-home" onclick="showHomeView(event)" class="flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors font-medium border-l-2 border-indigo-600">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> Home
                     </a>
                     <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors border-l-2 border-transparent">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> My Dashboards
                     </a>
-
-                    <div>
-                        <a href="#" id="nav-signalflow" onclick="openFlowModal(event)" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 cursor-pointer rounded-md transition-colors mt-2 font-medium border-l-2 border-transparent">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Signal Flow
-                        </a>
-                        <div id="sidebar-saved-flows" class="mt-2 ml-5 pl-3 border-l border-slate-200 space-y-1">
-                            <div class="text-[10px] text-slate-400 py-1 flex items-center gap-2">
-                                <svg class="animate-spin w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                Loading...
-                            </div>
-                        </div>
-                    </div>
-
+                    <a href="#" id="nav-signalflow" onclick="showFlowListView(event)" class="flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors mt-2 font-medium border-l-2 border-indigo-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Signal Flow
+                    </a>
                 </div>
             </div>
             <div>
@@ -102,11 +92,11 @@
         </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col min-w-0 bg-white">
+    <main class="flex-1 flex flex-col min-w-0 bg-white relative z-10">
 
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-20 relative">
             <div class="flex items-center text-sm text-slate-500" id="header-breadcrumbs">
-                Home
+                Home <span class="mx-2">/</span> <span class="text-slate-800 font-medium">Signal Flow</span>
             </div>
             <div class="flex items-center gap-4">
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-200 text-indigo-600 bg-indigo-50 uppercase tracking-wide">Pro</span>
@@ -114,50 +104,77 @@
             </div>
         </header>
 
-        <div id="home-view" class="flex-1 flex flex-col items-center justify-center">
-            <div class="text-center text-slate-400">
-                <svg class="w-16 h-16 mx-auto mb-4 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                <h2 class="text-xl font-medium text-slate-500">Welcome to Consentium IoT</h2>
-                <p class="text-sm mt-2">Select a module from the sidebar to begin.</p>
+        <div id="flow-list-view" class="flex-1 flex flex-col bg-slate-50 overflow-y-auto relative">
+            <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-indigo-50/50 to-transparent pointer-events-none z-0"></div>
+
+            <div class="max-w-7xl w-full mx-auto px-8 py-10 relative z-10">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Data Pipelines</h2>
+                        <p class="text-base text-slate-500 mt-2">Manage, monitor, and route data flows across your infrastructure.</p>
+                    </div>
+
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <div class="relative w-full md:w-80">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <input type="text" id="main-flow-search" class="block w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm sm:text-sm bg-white/80 backdrop-blur-sm transition-all hover:bg-white" placeholder="Search pipelines...">
+                        </div>
+                        <button onclick="openCreateFlowModal()" class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-200 hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 whitespace-nowrap">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            New Flow
+                        </button>
+                    </div>
+                </div>
+
+                <div id="main-saved-flows-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    </div>
             </div>
         </div>
 
-        <div id="signalflow-view" class="hidden flex-1 overflow-hidden relative">
+        <div id="signalflow-view" class="hidden flex-1 overflow-hidden relative flex">
 
-            <div id="canvas" class="flex-1 canvas-bg relative overflow-hidden transition-colors duration-200">
-                <div class="absolute top-4 left-4 z-10 flex gap-2 items-center">
-                    <button id="run-btn" onclick="toggleRunFlow()" class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors w-32 justify-center">
+            <div class="flex-1 relative flex flex-col overflow-hidden h-full w-full">
+
+                <div class="absolute top-4 left-4 z-20 flex gap-2 items-center pointer-events-none">
+                    <button onclick="showFlowListView()" class="pointer-events-auto px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        <span>Back</span>
+                    </button>
+                    <div class="w-px h-6 bg-slate-300 mx-1"></div>
+                    <button id="run-btn" onclick="toggleRunFlow()" class="pointer-events-auto px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors w-32 justify-center">
                         <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                         <span>Run Flow</span>
                     </button>
-                    <button onclick="saveCurrentFlow()" id="save-btn" class="px-3 py-1.5 bg-indigo-600 shadow-sm rounded-md text-sm font-medium text-white hover:bg-indigo-700">Save Flow</button>
-                    <button class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-1 ml-4" onclick="clearCanvas(event)">
+                    <button onclick="saveCurrentFlow()" id="save-btn" class="pointer-events-auto px-3 py-1.5 bg-indigo-600 shadow-sm rounded-md text-sm font-medium text-white hover:bg-indigo-700">Save Flow</button>
+                    <button class="pointer-events-auto px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-1 ml-4" onclick="clearCanvas(event)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Clear
                     </button>
                 </div>
 
-                <div class="absolute top-4 right-4 z-10 flex gap-2 items-center">
-                    <button onclick="toggleBlocksSidebar()" id="sidebar-toggle-btn" class="px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
+                <div class="absolute top-4 right-4 z-20 flex gap-2 items-center pointer-events-none">
+                    <button onclick="toggleBlocksSidebar()" id="sidebar-toggle-btn" class="pointer-events-auto px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         <span>Hide Blocks</span>
                     </button>
                 </div>
 
-                <svg class="absolute top-0 left-0 w-full h-full pointer-events-none z-0" id="svg-layer"></svg>
-
-                <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
+                <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none z-10">
                     <svg class="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     <h2 class="text-lg font-medium text-slate-500">Workspace is empty</h2>
                     <p class="text-sm mt-1">Drag and drop blocks from the library to build your pipeline.</p>
                 </div>
 
-                <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 px-4 py-2 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm rounded-full pointer-events-none hidden md:block">
-                    <span class="text-xs text-slate-500"><span class="font-bold text-slate-700">Tip:</span> Double-click a wire to delete it.</span>
+                <div class="flex-1 overflow-auto relative bg-[#f8fafc] w-full h-full" id="canvas-scroll-wrapper">
+                    <div id="canvas" class="canvas-bg relative w-[5000px] h-[3000px] transition-colors duration-200">
+                        <svg class="absolute top-0 left-0 w-full h-full pointer-events-none z-0" id="svg-layer"></svg>
+                    </div>
                 </div>
+
             </div>
 
-            <aside id="blocks-sidebar" class="w-80 bg-white border-l border-slate-200 flex flex-col shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.02)] z-20 shrink-0 transition-[width,border-width,opacity] duration-300 overflow-hidden">
-
+            <aside id="blocks-sidebar" class="w-80 bg-white border-l border-slate-200 flex flex-col shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.02)] z-30 shrink-0 transition-[width,border-width,opacity] duration-300 overflow-hidden">
                 <div id="panel-library" class="flex flex-col h-full">
                     <div class="h-14 flex items-center px-4 border-b border-slate-200 bg-slate-50">
                         <div class="text-sm font-semibold text-slate-800">Available Blocks</div>
@@ -229,7 +246,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -255,80 +271,26 @@
         </div>
     </main>
 
-
-    <div id="flow-manager-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
-        <div class="bg-white rounded-xl shadow-2xl w-[560px] flex flex-col relative overflow-hidden">
-            
-            <div id="modal-step-1" class="flex flex-col h-full">
-                <div class="px-8 pt-8 pb-4">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-1">Select Flow</h2>
-                    <p class="text-slate-500 text-sm">Open an existing flow or create a new one.</p>
+    <div id="create-flow-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-[480px] flex flex-col relative overflow-hidden transform scale-95 transition-transform duration-200" id="modal-content-box">
+            <div class="px-8 pt-8 pb-4">
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Create New Flow</h2>
+                <p class="text-slate-500 text-sm">Give your pipeline a clear name and goal.</p>
+            </div>
+            <div class="px-8 pb-8 space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Flow Name</label>
+                    <input type="text" id="new-flow-name" placeholder="e.g., HVAC Temperature Monitoring" class="w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all">
                 </div>
-
-                <div class="px-8 pb-4">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </div>
-                        <input type="text" id="flow-search-input" class="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Search flows...">
-                    </div>
-                </div>
-
-                <div class="px-8 pb-6 flex-1 overflow-y-auto max-h-[50vh]">
-                    <div onclick="showCreateFlowStep2()" class="flex items-center gap-4 p-4 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 hover:border-indigo-300 transition-colors mb-4">
-                        <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 font-bold text-2xl">
-                            +
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-indigo-800 font-bold text-base">Create New Flow</span>
-                            <span class="text-indigo-600 text-sm">Start from scratch</span>
-                        </div>
-                    </div>
-
-                    <div id="modal-saved-flows-list" class="space-y-3">
-                        </div>
-                </div>
-
-                <div class="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-indigo-600"></div>
-                        <div class="w-2 h-2 rounded-full bg-slate-200"></div>
-                        <span class="text-xs text-slate-400 ml-1 font-semibold">Step 1 of 2</span>
-                    </div>
-                    <button onclick="closeFlowModal()" class="font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Description <span class="text-slate-400 font-normal">(Optional)</span></label>
+                    <textarea id="new-flow-desc" placeholder="Briefly describe what this flow does..." rows="3" class="w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none transition-all"></textarea>
                 </div>
             </div>
-
-            <div id="modal-step-2" class="flex flex-col h-full hidden">
-                <div class="px-8 pt-8 pb-4">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-1">Flow Details</h2>
-                    <p class="text-slate-500 text-sm">Provide a name and description for your new flow.</p>
-                </div>
-
-                <div class="px-8 pb-6 space-y-5 flex-1 overflow-y-auto max-h-[50vh]">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Flow Name</label>
-                        <input type="text" id="new-flow-name" placeholder="e.g., Temperature Monitoring" class="w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Description (Optional)</label>
-                        <textarea id="new-flow-desc" placeholder="Briefly describe what this flow does..." rows="3" class="w-full px-4 py-3 border border-slate-300 rounded-lg shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"></textarea>
-                    </div>
-                </div>
-
-                <div class="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-slate-200 cursor-pointer" onclick="showCreateFlowStep1()"></div>
-                        <div class="w-2 h-2 rounded-full bg-indigo-600"></div>
-                        <span class="text-xs text-slate-400 ml-1 font-semibold">Step 2 of 2</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <button onclick="showCreateFlowStep1()" class="font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
-                        <button onclick="confirmCreateNewFlow()" class="font-bold text-indigo-600 hover:text-indigo-800 transition-colors">Create</button>
-                    </div>
-                </div>
+            <div class="px-8 py-4 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/50">
+                <button onclick="closeCreateFlowModal()" class="px-4 py-2 font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
+                <button onclick="confirmCreateNewFlow()" class="px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Create Flow</button>
             </div>
-
         </div>
     </div>
 
@@ -336,6 +298,7 @@
         // ==========================================
         // SYSTEM STATE & DOM ELEMENTS
         // ==========================================
+        const canvasWrapper = document.getElementById('canvas-scroll-wrapper');
         const canvas = document.getElementById('canvas');
         const emptyState = document.getElementById('empty-state');
         const svgLayer = document.getElementById('svg-layer');
@@ -345,9 +308,7 @@
         let connections = [];
         let currentSelectedNodeId = null;
         let currentPipelineId = null;
-        let pipelineToDelete = null;
 
-        // Connect directly to the browser's persistent storage (Fallback logic)
         let savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
         let localPipelinesStore = JSON.parse(localStorage.getItem('signalflow_pipelines_store')) || {};
 
@@ -357,81 +318,359 @@
         let isConnecting = false;
         let tempLine = null;
         let connectionStartHandle = null;
+        let isFlowRunning = false;
 
         // ==========================================
         // VIEW NAVIGATION LOGIC
         // ==========================================
-        function showHomeView(e) {
+        function showFlowListView(e) {
             if (e) e.preventDefault();
 
-            // Clear flow_id from URL
             if (window.location.search.includes('flow_id=')) {
                 window.history.pushState({}, '', window.location.pathname);
             }
 
-            document.getElementById('home-view').classList.replace('hidden', 'flex');
+            document.getElementById('flow-list-view').classList.replace('hidden', 'flex');
             document.getElementById('signalflow-view').classList.replace('flex', 'hidden');
 
-            // Update breadcrumbs
-            document.getElementById('header-breadcrumbs').innerHTML = 'Home';
+            document.getElementById('header-breadcrumbs').innerHTML = 'Home <span class="mx-2">/</span> <span class="text-slate-800 font-medium">Signal Flow</span>';
+            document.getElementById('nav-signalflow').className = "flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors mt-2 font-medium border-l-2 border-indigo-600";
 
-            // Update nav active states
-            document.getElementById('nav-home').className = "flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors font-medium border-l-2 border-indigo-600";
-            document.getElementById('nav-signalflow').className = "flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors mt-2 font-medium border-l-2 border-transparent";
+            updateSavedGraphsUI();
         }
 
         function showSignalFlowView() {
-            document.getElementById('home-view').classList.replace('flex', 'hidden');
+            document.getElementById('flow-list-view').classList.replace('flex', 'hidden');
             document.getElementById('signalflow-view').classList.replace('hidden', 'flex');
 
-            // Update breadcrumbs
-            document.getElementById('header-breadcrumbs').innerHTML = 'Home <span class="mx-2">/</span> <span class="text-slate-800 font-medium">SignalFlow</span>';
-
-            // Update nav active states
-            document.getElementById('nav-home').className = "flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors font-medium border-l-2 border-transparent";
-            document.getElementById('nav-signalflow').className = "flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors mt-2 font-medium border-l-2 border-indigo-600";
+            document.getElementById('header-breadcrumbs').innerHTML = 'Home <span class="mx-2">/</span> <span class="text-slate-500 cursor-pointer hover:text-slate-800" onclick="showFlowListView()">Signal Flow</span> <span class="mx-2">/</span> <span class="text-slate-800 font-medium">Editor</span>';
         }
 
-        // Initialize UI
         window.addEventListener('DOMContentLoaded', async () => {
             await fetchSavedGraphs();
-
-            // Check URL for existing flow
             const urlParams = new URLSearchParams(window.location.search);
             const flowId = urlParams.get('flow_id');
             if (flowId) {
                 loadPipeline(flowId);
                 showSignalFlowView();
             } else {
-                showHomeView();
+                showFlowListView();
+            }
+
+            const searchInput = document.getElementById('main-flow-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase();
+                    const items = document.querySelectorAll('#main-saved-flows-list > .group');
+                    items.forEach(item => {
+                        const title = item.querySelector('.flow-title').innerText.toLowerCase();
+                        item.style.display = title.includes(query) ? 'flex' : 'none';
+                    });
+                });
             }
         });
 
         // ==========================================
-        // 1. DRAG & DROP INSTANTIATION
+        // UI & STATE MANAGEMENT
+        // ==========================================
+        async function fetchSavedGraphs() {
+            try {
+                const response = await fetch('/api/v1/pipelines', { headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' } });
+                if (response.ok) {
+                    const data = await response.json();
+                    savedGraphsList = data.data || [];
+                    savedGraphsList.forEach(graph => { localPipelinesStore[graph.id] = graph; });
+                    localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
+                    localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+                } else throw new Error("Backend unavailable.");
+            } catch(e) {
+                savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
+                localPipelinesStore = JSON.parse(localStorage.getItem('signalflow_pipelines_store')) || {};
+            } finally {
+                updateSavedGraphsUI();
+            }
+        }
+
+        function updateSavedGraphsUI() {
+            const container = document.getElementById('main-saved-flows-list');
+            if (!container) return;
+
+            if (savedGraphsList.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-24 px-6 text-slate-400 border-2 border-dashed border-slate-200 rounded-3xl bg-white/50 backdrop-blur-sm">
+                        <div class="w-20 h-20 mb-5 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-400 shadow-inner">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mb-2">No pipelines found</h3>
+                        <p class="text-sm text-slate-500 max-w-sm text-center mb-8">You haven't created any data flows yet. Build your first pipeline to start routing and analyzing data.</p>
+                        <button onclick="openCreateFlowModal()" class="px-6 py-3 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md text-slate-700 font-semibold rounded-xl transition-all flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Create First Pipeline
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            savedGraphsList.forEach(flow => {
+                const isRunning = flow.isRunning || false;
+                const dateObj = flow.timestamp ? new Date(flow.timestamp) : new Date();
+                const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+                const statusBadgeClasses = isRunning ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-600 border-slate-200';
+                const statusDotClasses = isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400';
+                const statusText = isRunning ? 'Active' : 'Stopped';
+                const cardBorderClass = isRunning ? 'border-emerald-200/60' : 'border-slate-200/75';
+
+                html += `
+                    <div class="group flex flex-col bg-white rounded-2xl border ${cardBorderClass} shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer" onclick="loadFlowFromModal('${flow.id}')">
+                        <div class="p-6 pb-4 flex justify-between items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100/50 flex items-center justify-center shrink-0 text-indigo-600 shadow-inner">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${statusBadgeClasses} text-[11px] font-bold uppercase tracking-wider shadow-sm">
+                                <span class="w-1.5 h-1.5 rounded-full ${statusDotClasses}"></span>
+                                ${statusText}
+                            </div>
+                        </div>
+                        <div class="px-6 pb-5 flex-1">
+                            <h3 class="flow-title text-xl font-bold text-slate-900 mb-1.5 group-hover:text-indigo-600 transition-colors line-clamp-1">${flow.title}</h3>
+                            <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed min-h-[2.5rem]">${flow.description || 'No description provided for this pipeline flow.'}</p>
+                        </div>
+                        <div class="px-6 py-4 border-t border-slate-50 bg-slate-50/50 flex items-center justify-between mt-auto">
+                            <span class="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                ${dateStr}
+                            </span>
+                            <div class="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
+                                <button onclick="toggleFlowStatusList('${flow.id}', event)" class="p-2 rounded-lg text-slate-400 hover:bg-white hover:shadow-sm ${isRunning ? 'hover:text-amber-500' : 'hover:text-emerald-500'} transition-all bg-transparent" title="${isRunning ? 'Pause Pipeline' : 'Start Pipeline'}">
+                                    ${isRunning
+                                        ? '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>'
+                                        : '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>'}
+                                </button>
+                                <button onclick="deletePipeline('${flow.id}', event)" class="p-2 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all bg-transparent" title="Delete Pipeline">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function openCreateFlowModal() {
+            const modal = document.getElementById('create-flow-modal');
+            const content = document.getElementById('modal-content-box');
+            modal.classList.remove('hidden');
+            setTimeout(() => { content.classList.replace('scale-95', 'scale-100'); }, 10);
+            document.getElementById('new-flow-name').value = '';
+            document.getElementById('new-flow-desc').value = '';
+            setTimeout(() => document.getElementById('new-flow-name').focus(), 100);
+        }
+
+        function closeCreateFlowModal() {
+            const modal = document.getElementById('create-flow-modal');
+            const content = document.getElementById('modal-content-box');
+            content.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 150);
+        }
+
+        async function confirmCreateNewFlow() {
+            const name = document.getElementById('new-flow-name').value.trim() || 'Untitled Pipeline';
+            const desc = document.getElementById('new-flow-desc').value.trim();
+
+            try {
+                const response = await fetch('/api/v1/pipelines', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: name, description: desc, nodes: [], topology: [] })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const newId = data.pipeline_id || `flow-${Date.now()}`;
+                    closeCreateFlowModal();
+                    loadPipeline(newId);
+                    showSignalFlowView();
+                    fetchSavedGraphs();
+                } else throw new Error("Failed to create flow on server");
+            } catch (err) {
+                const newId = `flow-${Date.now()}`;
+                const newFlow = { id: newId, title: name, description: desc, timestamp: new Date().toISOString(), isRunning: false, nodes: [], topology: [] };
+                savedGraphsList.push(newFlow);
+                localPipelinesStore[newId] = newFlow;
+                localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+                localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
+
+                closeCreateFlowModal();
+                loadPipeline(newId);
+                showSignalFlowView();
+            }
+        }
+
+        function loadFlowFromModal(id) {
+            loadPipeline(id);
+            showSignalFlowView();
+        }
+
+        async function toggleFlowStatusList(pipelineId, event) {
+            event.stopPropagation();
+            const flowIndex = savedGraphsList.findIndex(f => f.id === pipelineId);
+            if (flowIndex === -1) return;
+
+            const isCurrentlyRunning = savedGraphsList[flowIndex].isRunning;
+            const newAction = isCurrentlyRunning ? "stop" : "start";
+
+            try {
+                await fetch('/api/v1/pipelines/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: newAction, pipeline_id: pipelineId })
+                });
+            } catch (err) {}
+
+            savedGraphsList[flowIndex].isRunning = !isCurrentlyRunning;
+            localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+            updateSavedGraphsUI();
+
+            if (currentPipelineId === pipelineId) {
+                if (savedGraphsList[flowIndex].isRunning && !isFlowRunning) toggleRunFlow(true);
+                else if (!savedGraphsList[flowIndex].isRunning && isFlowRunning) toggleRunFlow(false);
+            }
+        }
+
+        async function deletePipeline(pipelineId, event) {
+            event.stopPropagation();
+            if (window.confirm("Delete this pipeline permanently?")) {
+                try {
+                    const response = await fetch(`/api/v1/pipelines/${pipelineId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' } });
+                    if (response.ok) executeDeletionCleanup(pipelineId);
+                    else alert("Failed to delete the pipeline from the server.");
+                } catch (error) {
+                    executeDeletionCleanup(pipelineId);
+                }
+            }
+        }
+
+        function executeDeletionCleanup(pipelineId) {
+            savedGraphsList = savedGraphsList.filter(g => g.id !== pipelineId);
+            delete localPipelinesStore[pipelineId];
+            localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
+            localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+
+            if (currentPipelineId === pipelineId) clearCanvas(new Event('click'));
+            else updateSavedGraphsUI();
+        }
+
+        async function loadPipeline(pipelineId) {
+            let pipelineData;
+            try {
+                const response = await fetch(`/api/v1/pipelines/${pipelineId}`, { headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' } });
+                if(response.ok) {
+                    const data = await response.json();
+                    pipelineData = data.pipeline || data;
+                } else throw new Error("Backend load failed");
+            } catch (e) {
+                pipelineData = localPipelinesStore[pipelineId];
+            }
+
+            if (!pipelineData) return alert("Pipeline data could not be found.");
+
+            clearCanvas(new Event('click'));
+            currentPipelineId = pipelineId;
+            emptyState.style.display = 'none';
+
+            const flowIndex = savedGraphsList.findIndex(f => f.id === pipelineId);
+            if (flowIndex > -1 && savedGraphsList[flowIndex].isRunning) toggleRunFlow(true);
+
+            let maxId = 0;
+
+            pipelineData.nodes.forEach(n => {
+                instantiateNode(n.type, n.x || '100px', n.y || '100px', n.id);
+                const nodeIndex = nodesData.findIndex(nd => nd.id === n.id);
+                if(nodeIndex !== -1) {
+                    nodesData[nodeIndex].config = n.config || {};
+                    const config = nodesData[nodeIndex].config;
+                    const el = document.getElementById(n.id);
+
+                    if (n.type === 'telemetry') {
+                        if(config.targetHardware) el.querySelector('.node-title').innerText = config.targetHardware;
+                        if(config.activeSensor) el.querySelector('.node-subtitle').innerText = `Sensor: ${config.activeSensor}`;
+                    } else if (n.type === 'edgecommand') {
+                        const keyEl = document.getElementById(`${n.id}-display-key`);
+                        const chEl = document.getElementById(`${n.id}-display-channel`);
+                        const actEl = document.getElementById(`${n.id}-display-action`);
+                        if (keyEl) keyEl.innerText = config.boardKey ? config.boardKey : 'Unconfigured';
+                        if (chEl) chEl.innerText = `CH ${config.channel || '0'}`;
+                        if (actEl) {
+                            if (config.actionType === 'Value') actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
+                            else actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
+                        }
+                    }
+                }
+                const idNum = parseInt(n.id.replace('node-', ''));
+                if(!isNaN(idNum) && idNum > maxId) maxId = idNum;
+            });
+
+            nodeIdCounter = maxId + 1;
+
+            pipelineData.topology.forEach(t => {
+                const connId = `conn-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
+                const toHandle = t.targetHandle || 'in';
+
+                connections.push({ id: connId, fromNode: t.source, fromHandle: t.trigger, toNode: t.target, toHandle: toHandle });
+
+                const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                tempLine.id = connId;
+                if(t.trigger === 'out-true') tempLine.setAttribute('stroke', '#ef4444');
+                else tempLine.setAttribute('stroke', '#64748b');
+                tempLine.setAttribute('stroke-width', '2');
+                tempLine.setAttribute('fill', 'none');
+                tempLine.classList.add('wire-path');
+                if (isFlowRunning) tempLine.classList.add('wire-flowing');
+                svgLayer.appendChild(tempLine);
+            });
+
+            setTimeout(() => { redrawAllConnections(); }, 50);
+
+            window.history.pushState({ id: pipelineId }, '', `?flow_id=${pipelineId}`);
+            updateSavedGraphsUI();
+        }
+
+        // ==========================================
+        // DRAG & DROP WIRING ENGINE (SCROLL AWARE)
         // ==========================================
         function handleDragStart(e, type) {
             e.dataTransfer.setData('nodeType', type);
         }
 
-        canvas.addEventListener('dragover', (e) => {
+        canvasWrapper.addEventListener('dragover', (e) => {
             e.preventDefault();
-            canvas.classList.add('drag-over');
+            canvasWrapper.classList.add('drag-over');
         });
 
-        canvas.addEventListener('dragleave', () => {
-            canvas.classList.remove('drag-over');
+        canvasWrapper.addEventListener('dragleave', () => {
+            canvasWrapper.classList.remove('drag-over');
         });
 
-        canvas.addEventListener('drop', (e) => {
+        canvasWrapper.addEventListener('drop', (e) => {
             e.preventDefault();
-            canvas.classList.remove('drag-over');
+            canvasWrapper.classList.remove('drag-over');
 
             const type = e.dataTransfer.getData('nodeType');
             if (!type) return;
 
+            if (type === 'telemetry') {
+                const hasTelemetry = nodesData.some(node => node.type === 'telemetry');
+                if (hasTelemetry) {
+                    alert('You can only add one Telemetry block per pipeline.');
+                    return; // Stop execution, do not add the node
+                }
+            }
+
             emptyState.style.display = 'none';
 
+            // Calculate exact drop position relative to the scrollable canvas inner container
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left - 100;
             const y = e.clientY - rect.top - 40;
@@ -440,197 +679,144 @@
         });
 
         // ==========================================
-        // 2. HTML NODE TEMPLATES
+        // ALL NODE TEMPLATES
         // ==========================================
         const nodeTemplates = {
-        'telemetry': (id) => `
-            <div id="${id}" class="node-card w-72 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-blue-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-                <button onclick="showSettingsPanel('${id}', 'telemetry', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </button>
+            'telemetry': (id) => `
+                <div id="${id}" class="node-card w-72 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-blue-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'telemetry', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                        <div class="flex-1 min-w-0 pr-12"><h3 class="node-title text-sm font-bold text-slate-800 leading-tight truncate">Data Source</h3><p class="node-subtitle text-[11px] font-semibold text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded mt-0.5 border border-blue-100">Unconfigured</p></div>
+                    </div>
+                    <div class="px-3 py-2 bg-slate-50/50 rounded-b-xl relative">
+                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                    </div>
+                </div>`,
 
-                <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            'edgecommand': (id) => `
+                <div id="${id}" class="node-card w-64 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-fuchsia-500 cursor-move" style="z-index: 10;">
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="flex justify-between items-center p-2.5 border-b border-slate-100">
+                        <div class="flex items-center gap-2 pointer-events-none">
+                            <div class="w-7 h-7 rounded-lg bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center border border-fuchsia-100"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                            <h3 class="text-xs font-bold text-slate-800">Hardware Relay</h3>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="deleteNode('${id}', event)" class="text-slate-300 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                            <button onclick="showSettingsPanel('${id}', 'edgecommand', event)" class="text-slate-300 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-0 pr-12">
-                        <h3 class="node-title text-sm font-semibold text-slate-800 leading-tight truncate">Data Source</h3>
-                        <p class="node-subtitle text-[11px] font-medium text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded mt-0.5 border border-blue-100">Unconfigured</p>
+                    <div class="p-3 bg-slate-50/50 rounded-b-xl pointer-events-none">
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Board Key</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-key">Unconfigured</span></div>
+                            <div class="flex justify-between mt-0.5 pt-1 border-t border-slate-100"><span class="text-[10px] font-semibold text-slate-500">Channel</span><span class="text-[10px] font-bold text-fuchsia-600" id="${id}-display-channel">CH 0</span></div>
+                            <div class="flex justify-between mt-0.5 pt-1 border-t border-slate-100"><span class="text-[10px] font-semibold text-slate-500">Action</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-action">ON (1)</span></div>
+                        </div>
                     </div>
-                </div>
-                <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative">
+                </div>`,
+
+            'movingaverage': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-cyan-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'movingaverage', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></div>
+                        <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Moving Avg</h3></div>
+                    </div>
                     <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-                </div>
-            </div>`,
+                </div>`,
 
-        'edgecommand': (id) => `
-            <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-fuchsia-500 cursor-move" style="z-index: 10;">
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                <div class="flex justify-between items-center p-2 border-b border-slate-100">
-                    <div class="flex items-center gap-2 pointer-events-none">
-                        <div class="w-6 h-6 rounded bg-fuchsia-50 text-fuchsia-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        </div>
-                        <h3 class="text-xs font-semibold text-slate-800">Hardware Relay</h3>
+            'zscore': (id) => `
+                <div id="${id}" class="node-card w-64 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-purple-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'zscore', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div>
+                        <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Z-Score Anomaly</h3></div>
                     </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="deleteNode('${id}', event)" class="text-slate-400 hover:text-red-500 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                        <button onclick="showSettingsPanel('${id}', 'edgecommand', event)" class="text-slate-400 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                    </div>
-                </div>
-
-                <div class="p-3 bg-slate-50 rounded-b-lg pointer-events-none">
-                    <div class="flex flex-col gap-1">
-                        <div class="flex justify-between">
-                            <span class="text-[10px] font-medium text-slate-500">Board Key</span>
-                            <span class="text-[10px] font-bold text-slate-800" id="${id}-display-key">Unconfigured</span>
+                    <div class="flex flex-col text-[11px] font-semibold">
+                        <div class="px-3 py-2.5 border-b border-slate-100 relative flex justify-between pointer-events-none">
+                            <span class="text-red-500">True (Anomaly)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-red-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
                         </div>
-                        <div class="flex justify-between mt-1 pt-1 border-t border-slate-200">
-                            <span class="text-[10px] font-medium text-slate-500">Channel</span>
-                            <span class="text-[10px] font-bold text-fuchsia-600" id="${id}-display-channel">CH 0</span>
-                        </div>
-                        <div class="flex justify-between mt-1 pt-1 border-t border-slate-200">
-                            <span class="text-[10px] font-medium text-slate-500">Action</span>
-                            <span class="text-[10px] font-bold text-slate-800" id="${id}-display-action">ON (1)</span>
+                        <div class="px-3 py-2.5 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
+                            <span class="text-slate-600">False (Normal)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
                         </div>
                     </div>
-                </div>
-            </div>`,
+                </div>`,
 
-        'movingaverage': (id) => `
-            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-cyan-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-                <button onclick="showSettingsPanel('${id}', 'movingaverage', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                <div class="p-3 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-cyan-50 text-cyan-600 flex items-center justify-center">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            'threshold': (id) => `
+                <div id="${id}" class="node-card w-64 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-amber-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'threshold', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg></div>
+                        <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Threshold</h3></div>
                     </div>
-                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Moving Avg</h3></div>
-                </div>
-                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-            </div>`,
-
-        'zscore': (id) => `
-            <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-purple-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-                <button onclick="showSettingsPanel('${id}', 'zscore', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-purple-50 text-purple-600 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <div class="flex flex-col text-[11px] font-semibold">
+                        <div class="px-3 py-2.5 border-b border-slate-100 relative flex justify-between pointer-events-none">
+                            <span class="text-amber-600">True (Match)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-amber-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
+                        </div>
+                        <div class="px-3 py-2.5 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
+                            <span class="text-slate-600">Pass through (No Match)</span>
+                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-800 leading-tight">Z-Score Anomaly</h3>
+                </div>`,
+
+            'arima': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-green-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'arima', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center border border-green-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg></div>
+                        <div><h3 class="text-sm font-bold text-slate-800 leading-tight">ARIMA Forecast</h3></div>
                     </div>
-                </div>
-                <div class="flex flex-col text-xs font-medium">
-                    <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
-                        <span class="text-red-500">True (Anomaly)</span>
-                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-red-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
+
+            'kalman': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-orange-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'kalman', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
+                        <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Kalman Filter</h3></div>
                     </div>
-                    <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
-                        <span class="text-slate-600">False (Normal)</span>
-                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
+
+            'holtwinters': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-teal-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'holtwinters', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
+                        <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Holt-Winters</h3></div>
                     </div>
-                </div>
-            </div>`,
+                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                </div>`,
 
-        'threshold': (id) => `
-            <div id="${id}" class="node-card w-64 bg-white rounded-lg shadow-md border border-slate-200 border-l-4 border-l-amber-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-                <button onclick="showSettingsPanel('${id}', 'threshold', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-amber-50 text-amber-600 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+            'alert': (id) => `
+                <div id="${id}" class="node-card w-56 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-red-500 cursor-move" style="z-index: 10;">
+                    <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <button onclick="showSettingsPanel('${id}', 'alert', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center border border-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
+                        <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Send Alert</h3></div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-800 leading-tight">Threshold</h3>
-                    </div>
-                </div>
-                <div class="flex flex-col text-xs font-medium">
-                    <div class="px-3 py-2 border-b border-slate-100 relative flex justify-between pointer-events-none">
-                        <span class="text-amber-600">True (Match)</span>
-                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-amber-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
-                    </div>
-                    <div class="px-3 py-2 bg-slate-50 rounded-b-lg relative flex justify-between pointer-events-none">
-                        <span class="text-slate-600">False (No Match)</span>
-                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
-                    </div>
-                </div>
-            </div>`,
-
-        'arima': (id) => `
-            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-green-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-                <button onclick="showSettingsPanel('${id}', 'arima', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                <div class="p-3 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-green-50 text-green-600 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                    </div>
-                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">ARIMA Forecast</h3></div>
-                </div>
-                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-            </div>`,
-
-        'kalman': (id) => `
-            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-orange-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                <button onclick="showSettingsPanel('${id}', 'kalman', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                <div class="p-3 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-orange-50 text-orange-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
-                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Kalman Filter</h3></div>
-                </div>
-                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-            </div>`,
-
-        'holtwinters': (id) => `
-            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-teal-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                <button onclick="showSettingsPanel('${id}', 'holtwinters', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                <div class="p-3 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-teal-50 text-teal-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
-                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Holt-Winters</h3></div>
-                </div>
-                <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
-            </div>`,
-
-        'alert': (id) => `
-            <div id="${id}" class="node-card w-56 bg-white rounded-lg shadow-sm border border-slate-200 border-l-4 border-l-red-500 cursor-move" style="z-index: 10;">
-                <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-                <button onclick="showSettingsPanel('${id}', 'alert', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-                <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-
-                <div class="p-3 flex items-center gap-3 pointer-events-none">
-                    <div class="w-7 h-7 rounded bg-red-50 text-red-600 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div><h3 class="text-sm font-semibold text-slate-800 leading-tight">Send Alert</h3></div>
-                </div>
-            </div>`,
-
-
+                </div>`
         };
 
         function instantiateNode(type, x, y, forcedId = null) {
@@ -643,7 +829,7 @@
         }
 
         // ==========================================
-        // 3. WIRING & DRAGGING ENGINE
+        // WIRING & DRAWING ENGINE
         // ==========================================
         function getHandleCenter(nodeId, handleClass, handleDataId) {
             const node = document.getElementById(nodeId);
@@ -753,6 +939,7 @@
                         else tempLine.setAttribute('stroke', '#64748b');
 
                         tempLine.classList.add('wire-path');
+                        if (isFlowRunning) tempLine.classList.add('wire-flowing');
 
                         tempLine = null;
                         redrawAllConnections();
@@ -771,7 +958,7 @@
         });
 
         // ==========================================
-        // 4. SIDEBAR SETTINGS LOGIC
+        // SETTINGS & NODE LOGIC (API INTEGRATED)
         // ==========================================
         const panelLibrary = document.getElementById('panel-library');
         const panelSettings = document.getElementById('panel-settings');
@@ -815,16 +1002,13 @@
                 .then(payload => {
                     const deviceNames = Object.keys(payload);
                     const activeDeviceName = config.targetHardware && deviceNames.includes(config.targetHardware)
-                        ? config.targetHardware
-                        : deviceNames[0];
+                        ? config.targetHardware : deviceNames[0];
 
                     const deviceOptions = deviceNames.map(dev =>
                         `<option value="${dev}" ${activeDeviceName === dev ? 'selected' : ''}>${dev}</option>`
                     ).join('');
 
-                    const getBoardKey = (deviceName) => {
-                        return (payload[deviceName] && payload[deviceName].key) || '';
-                    };
+                    const getBoardKey = (deviceName) => (payload[deviceName] && payload[deviceName].key) || '';
 
                     const generateSensorHTML = (deviceName) => {
                         const deviceObj = payload[deviceName] || {};
@@ -872,10 +1056,8 @@
                         document.getElementById('sensor-container').innerHTML = generateSensorHTML(newDevice);
                         document.getElementById('setting-boardKey').value = getBoardKey(newDevice);
                     });
-
                 })
                 .catch(err => {
-                    console.error("Device fetch error:", err);
                     settingsContent.innerHTML = `<div class="p-4 text-xs text-red-500">Failed to load hardware. Please check your API connection.</div>`;
                 });
             } else if (type === 'edgecommand') {
@@ -944,24 +1126,16 @@
                                 statusMsg.innerText = "No specific channels returned; using default 0-7.";
                                 statusMsg.className = "text-[10px] mt-1 text-slate-500";
                             }
-                        } else {
-                            statusMsg.innerText = "Device API not found, using default channels 0-7.";
-                            statusMsg.className = "text-[10px] mt-1 text-amber-500";
-                        }
+                        } else throw new Error();
                     } catch (e) {
-                        console.warn("Backend not active for channels", e);
                         statusMsg.innerText = "API unreachable, using default channels 0-7.";
                         statusMsg.className = "text-[10px] mt-1 text-amber-500";
                     }
                 };
 
-                document.getElementById('setting-boardKey').addEventListener('change', (e) => {
-                    fetchEdgeChannels(e.target.value);
-                });
+                document.getElementById('setting-boardKey').addEventListener('change', (e) => fetchEdgeChannels(e.target.value));
+                if (config.boardKey) fetchEdgeChannels(config.boardKey);
 
-                if (config.boardKey) {
-                    fetchEdgeChannels(config.boardKey);
-                }
             } else if (type === 'movingaverage') {
                 settingsContent.innerHTML = `
                     <div class="flex items-center gap-3 mb-6">
@@ -979,7 +1153,6 @@
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Window Size</label>
-                            <p class="text-[10px] text-slate-500 mb-2">Number of data points to include in the average.</p>
                             <input type="number" id="setting-windowSize" value="${config.windowSize || 10}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
                         </div>
                     </div>`;
@@ -989,15 +1162,11 @@
                         <div class="w-10 h-10 rounded bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                         </div>
-                        <div>
-                            <h2 class="text-sm font-bold text-slate-900">Z-Score Config</h2>
-                            <p class="text-[10px] text-slate-500">Statistical anomaly detection</p>
-                        </div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Z-Score Config</h2><p class="text-[10px] text-slate-500">Statistical anomaly detection</p></div>
                     </div>
                     <div class="space-y-5">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Rolling Window Size</label>
-                            <p class="text-[10px] text-slate-500 mb-2">Number of historical points for mean/std dev.</p>
                             <input type="number" id="setting-windowSize" value="${config.windowSize || 30}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
                         </div>
                         <div class="pt-2 border-t border-slate-100">
@@ -1007,13 +1176,6 @@
                             </div>
                             <input type="range" id="setting-threshold" min="1" max="5" step="0.1" value="${config.threshold || 2.5}" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="this.previousElementSibling.querySelector('span').innerText = this.value + ' σ'">
                         </div>
-                        <label class="flex items-start gap-2 pt-2 cursor-pointer">
-                            <input type="checkbox" id="setting-passthrough" ${config.passthrough !== false ? 'checked' : ''} class="rounded text-indigo-600 focus:ring-indigo-500 mt-0.5">
-                            <div>
-                                <span class="block text-xs font-semibold text-slate-700">Pass-through Normal Data</span>
-                                <span class="block text-[10px] text-slate-500">Attach original payload to 'False' output.</span>
-                            </div>
-                        </label>
                     </div>`;
             } else if (type === 'threshold') {
                 settingsContent.innerHTML = `
@@ -1043,10 +1205,7 @@
                         <div class="w-10 h-10 rounded bg-red-50 text-red-600 flex items-center justify-center border border-red-100">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                         </div>
-                        <div>
-                            <h2 class="text-sm font-bold text-slate-900">Send Alert</h2>
-                            <p class="text-[10px] text-slate-500">Notification & Webhooks</p>
-                        </div>
+                        <div><h2 class="text-sm font-bold text-slate-900">Send Alert</h2><p class="text-[10px] text-slate-500">Notification & Webhooks</p></div>
                     </div>
                     <div class="space-y-5">
                         <div>
@@ -1065,17 +1224,6 @@
                             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Message Template</label>
                             <textarea id="setting-template" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-xs focus:ring-1 focus:ring-indigo-500 outline-none font-mono text-slate-600 resize-none">${config.template || 'Alert triggered on {{device_id}}!\nMetric: {{metric_name}}\nValue: {{value}}'}</textarea>
                         </div>
-                        <div class="pt-3 border-t border-slate-100">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Throttling (Cooldown)</label>
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm text-slate-600">Max 1 alert per</span>
-                                <input type="number" id="setting-cooldownLimit" value="${config.cooldownLimit || 15}" class="w-16 px-2 py-1 border border-slate-300 rounded-md shadow-sm text-sm text-center focus:ring-1 focus:ring-indigo-500 outline-none">
-                                <select id="setting-cooldownUnit" class="px-2 py-1 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
-                                    <option ${config.cooldownUnit === 'Mins' ? 'selected' : ''}>Mins</option>
-                                    <option ${config.cooldownUnit === 'Hours' ? 'selected' : ''}>Hours</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>`;
             } else if (type === 'arima') {
                 settingsContent.innerHTML = `
@@ -1083,10 +1231,7 @@
                         <div class="w-10 h-10 rounded bg-green-50 text-green-600 flex items-center justify-center border border-green-100">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
                         </div>
-                        <div>
-                            <h2 class="text-sm font-bold text-slate-900">ARIMA Forecast</h2>
-                            <p class="text-[10px] text-slate-500">EdgeNeuron predictive modeling</p>
-                        </div>
+                        <div><h2 class="text-sm font-bold text-slate-900">ARIMA Forecast</h2><p class="text-[10px] text-slate-500">EdgeNeuron predictive modeling</p></div>
                     </div>
                     <div class="space-y-5">
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-md">
@@ -1098,10 +1243,7 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Horizon (steps)</label>
-                                <input type="number" id="setting-horizon" value="${config.horizon || 10}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none">
-                            </div>
+                            <div><label class="block text-xs font-semibold text-slate-700 mb-1.5">Horizon (steps)</label><input type="number" id="setting-horizon" value="${config.horizon || 10}" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm focus:ring-1 focus:ring-indigo-500 outline-none"></div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1.5">Confidence</label>
                                 <select id="setting-confidence" class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm text-sm bg-white focus:ring-1 focus:ring-indigo-500 outline-none">
@@ -1137,7 +1279,6 @@
                         </div>
                         <div><label class="block text-xs font-semibold text-slate-700 mb-1">Seasonality Period (L)</label><input type="number" id="setting-period" value="${config.period || 12}" class="w-full px-3 py-1.5 border border-slate-300 rounded-md shadow-sm text-sm"></div>
                     </div>`;
-
             }
         }
 
@@ -1167,7 +1308,6 @@
             if (nodeType === 'telemetry') {
                 const titleEl = nodeEl.querySelector('.node-title');
                 const subtitleEl = nodeEl.querySelector('.node-subtitle');
-
                 if (titleEl) titleEl.innerText = config.targetHardware || 'Data Source';
                 if (subtitleEl) subtitleEl.innerText = config.activeSensor ? `Sensor: ${config.activeSensor}` : 'Unconfigured';
             } else if (nodeType === 'edgecommand') {
@@ -1178,14 +1318,10 @@
                 if (keyEl) keyEl.innerText = config.boardKey ? config.boardKey : 'Unconfigured';
                 if (chEl) chEl.innerText = `CH ${config.channel || '0'}`;
                 if (actEl) {
-                    if (config.actionType === 'Value') {
-                        actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
-                    } else {
-                        actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
-                    }
+                    if (config.actionType === 'Value') actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
+                    else actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
                 }
 
-                // Pass selected channel to the backend to update the entry
                 if (config.boardKey && config.channel) {
                     fetch('/api/v1/hardware/channels/take', {
                         method: 'POST',
@@ -1201,358 +1337,16 @@
 
             showLibraryPanel();
             nodeEl.classList.add('ring-2', 'ring-green-400');
-            setTimeout(() => {
-                nodeEl.classList.remove('ring-2', 'ring-green-400');
-            }, 500);
+            setTimeout(() => { nodeEl.classList.remove('ring-2', 'ring-green-400'); }, 500);
         }
 
         // ==========================================
-        // 5. SAVED GRAPHS LOGIC (SIDEBAR & MODAL)
-        // ==========================================
-        async function fetchSavedGraphs() {
-            try {
-                const response = await fetch('/api/v1/pipelines', {
-                    headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    savedGraphsList = data.data || [];
-
-                    // Sync the local store
-                    savedGraphsList.forEach(graph => {
-                        localPipelinesStore[graph.id] = graph;
-                    });
-                    localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
-                    localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
-                } else {
-                    throw new Error("Backend unavailable.");
-                }
-            } catch(e) {
-                console.warn("Using local pipeline storage.");
-                savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
-                localPipelinesStore = JSON.parse(localStorage.getItem('signalflow_pipelines_store')) || {};
-            } finally {
-                updateSavedGraphsUI();
-            }
-        }
-
-        function updateSavedGraphsUI() {
-            const container = document.getElementById('sidebar-saved-flows');
-
-            if (savedGraphsList.length > 0) {
-                let html = '';
-                savedGraphsList.forEach(g => {
-                    const isActive = currentPipelineId === g.id;
-                    const activeClasses = isActive ? 'text-indigo-700 bg-indigo-50 font-medium' : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50';
-
-                    html += `
-                        <div class="group flex items-center justify-between text-xs rounded-md py-1.5 px-2 cursor-pointer transition-colors ${activeClasses}" onclick="loadPipeline('${g.id}'); showSignalFlowView();">
-                            <span class="truncate pr-2">${g.title}</span>
-                            <button onclick="deletePipeline('${g.id}', event)" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 p-1 rounded transition-all" title="Delete Flow">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                        </div>`;
-                });
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = `<div class="text-[10px] text-slate-400 py-1 px-2">No flows saved yet.</div>`;
-            }
-        }
-
-        function openFlowModal(e) {
-            if (e) e.preventDefault();
-            const modal = document.getElementById('flow-manager-modal');
-            const listContainer = document.getElementById('modal-saved-flows-list');
-
-            // Reset to step 1
-            const step1 = document.getElementById('modal-step-1');
-            const step2 = document.getElementById('modal-step-2');
-            if(step1 && step2) {
-                step1.classList.remove('hidden');
-                step2.classList.add('hidden');
-            }
-
-            listContainer.innerHTML = '';
-
-            // Ensure we are working with the freshest data
-            savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
-
-            if (savedGraphsList.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-6 text-slate-400 border border-slate-100 rounded-lg bg-slate-50">
-                        <svg class="w-8 h-8 mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                        <span class="text-sm">No saved flows found.</span>
-                    </div>`;
-            } else {
-                savedGraphsList.forEach(flow => {
-                    const isCurrentlyActiveFlow = (flow.id === currentPipelineId);
-                    const isRunningStatus = isCurrentlyActiveFlow && isFlowRunning;
-
-                    const dateObj = flow.timestamp ? new Date(flow.timestamp) : new Date();
-                    const dateStr = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                    const timeStr = dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-
-                    // Green dot if running, Red dot if stopped
-                    const dotColor = isRunningStatus ? 'bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]' : 'bg-red-500';
-                    const tooltipText = isRunningStatus ? 'Running' : 'Stopped';
-
-                    listContainer.innerHTML += `
-                        <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer group" onclick="loadFlowFromModal('${flow.id}')">
-                            <div class="flex items-center gap-4 min-w-0 pr-4">
-                                <div class="w-12 h-12 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-500 shadow-sm">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                                </div>
-                                <div class="flex flex-col gap-0.5 min-w-0">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-base font-bold text-slate-800 truncate">${flow.title}</span>
-                                        ${isCurrentlyActiveFlow ? `<span class="w-2 h-2 rounded-full ${dotColor}" title="${tooltipText}"></span>` : ''}
-                                    </div>
-                                    <span class="text-sm text-slate-500 truncate">
-                                        Last mod: ${dateStr} at ${timeStr}
-                                    </span>
-                                </div>
-                            </div>
-                            <button onclick="deletePipeline('${flow.id}', event); event.stopPropagation();" class="text-slate-300 hover:text-red-500 p-2 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                        </div>
-                    `;
-                });
-            }
-
-            // Setup search filter
-            const searchInput = document.getElementById('flow-search-input');
-            if (searchInput) {
-                searchInput.value = '';
-                searchInput.oninput = function() {
-                    const query = searchInput.value.toLowerCase();
-                    const listItems = listContainer.querySelectorAll('.group');
-                    listItems.forEach(item => {
-                        const title = item.querySelector('.font-bold').innerText.toLowerCase();
-                        if (title.includes(query)) {
-                            item.style.display = 'flex';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                };
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function showCreateFlowStep2() {
-            document.getElementById('modal-step-1').classList.add('hidden');
-            document.getElementById('modal-step-2').classList.remove('hidden');
-            document.getElementById('new-flow-name').value = '';
-            document.getElementById('new-flow-desc').value = '';
-            document.getElementById('new-flow-name').focus();
-        }
-
-        function showCreateFlowStep1() {
-            document.getElementById('modal-step-2').classList.add('hidden');
-            document.getElementById('modal-step-1').classList.remove('hidden');
-        }
-
-        async function confirmCreateNewFlow() {
-            const name = document.getElementById('new-flow-name').value.trim() || 'Untitled Pipeline';
-            const desc = document.getElementById('new-flow-desc').value.trim();
-
-            try {
-                const response = await fetch('/api/v1/pipelines', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: name,
-                        description: desc,
-                        nodes: [],
-                        topology: []
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const newId = data.pipeline_id;
-
-                    loadPipeline(newId);
-                    showSignalFlowView();
-                    closeFlowModal();
-                    fetchSavedGraphs();
-                } else {
-                    alert("Failed to create flow");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Error creating flow");
-            }
-        }
-
-        function loadFlowFromModal(id) {
-            loadPipeline(id);
-            showSignalFlowView();
-            closeFlowModal();
-        }
-
-        function closeFlowModal() {
-            document.getElementById('flow-manager-modal').classList.add('hidden');
-        }
-
-        async function loadPipeline(pipelineId) {
-            let pipelineData;
-
-            try {
-                const response = await fetch(`/api/v1/pipelines/${pipelineId}`, {
-                    headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
-                });
-                if(response.ok) {
-                    const data = await response.json();
-                    pipelineData = data.pipeline || data;
-                } else {
-                    throw new Error("Backend load failed");
-                }
-            } catch (e) {
-                // Fallback to local memory if API isn't up
-                pipelineData = localPipelinesStore[pipelineId];
-            }
-
-            if (!pipelineData) {
-                alert("Pipeline data could not be found.");
-                return;
-            }
-
-            // 1. Clean Slate FIRST (this wipes currentPipelineId to null)
-            clearCanvas(new Event('click'));
-
-            // 2. SET THE ID AFTER CLEARING
-            currentPipelineId = pipelineId;
-
-            emptyState.style.display = 'none';
-
-            let maxId = 0;
-
-            // Reconstruct Nodes
-            pipelineData.nodes.forEach(n => {
-                instantiateNode(n.type, n.x || '100px', n.y || '100px', n.id);
-
-                const nodeIndex = nodesData.findIndex(nd => nd.id === n.id);
-                if(nodeIndex !== -1) {
-                    nodesData[nodeIndex].config = n.config || {};
-
-                    if (n.type === 'telemetry' && n.config) {
-                        const el = document.getElementById(n.id);
-                        if(n.config.targetHardware) el.querySelector('.node-title').innerText = n.config.targetHardware;
-                        if(n.config.activeSensor) el.querySelector('.node-subtitle').innerText = `Sensor: ${n.config.activeSensor}`;
-                    } else if (n.type === 'edgecommand' && n.config) {
-                        const keyEl = document.getElementById(`${n.id}-display-key`);
-                        const chEl = document.getElementById(`${n.id}-display-channel`);
-                        const actEl = document.getElementById(`${n.id}-display-action`);
-                        if (keyEl) keyEl.innerText = n.config.boardKey ? n.config.boardKey : 'Unconfigured';
-                        if (chEl) chEl.innerText = `CH ${n.config.channel || '0'}`;
-                        if (actEl) {
-                            if (n.config.actionType === 'Value') {
-                                actEl.innerText = n.config.actionValue ? `Val: ${n.config.actionValue}` : 'Val: -';
-                            } else {
-                                actEl.innerText = n.config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
-                            }
-                        }
-                    }
-                }
-
-                // Prevent ID collisions
-                const idNum = parseInt(n.id.replace('node-', ''));
-                if(!isNaN(idNum) && idNum > maxId) maxId = idNum;
-            });
-
-            nodeIdCounter = maxId + 1;
-
-            // Reconstruct Wires
-            pipelineData.topology.forEach(t => {
-                const connId = `conn-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
-                const toHandle = t.targetHandle || 'in';
-
-                connections.push({
-                    id: connId,
-                    fromNode: t.source,
-                    fromHandle: t.trigger,
-                    toNode: t.target,
-                    toHandle: toHandle
-                });
-
-                const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                tempLine.id = connId;
-                if(t.trigger === 'out-true') tempLine.setAttribute('stroke', '#ef4444');
-                else tempLine.setAttribute('stroke', '#64748b');
-                tempLine.setAttribute('stroke-width', '2');
-                tempLine.setAttribute('fill', 'none');
-                tempLine.classList.add('wire-path');
-                svgLayer.appendChild(tempLine);
-            });
-
-            // Ensure DOM has calculated node sizes before redrawing lines
-            setTimeout(() => {
-                redrawAllConnections();
-            }, 50);
-
-            // Update the URL and the sidebar UI to reflect the active selection
-            window.history.pushState({ id: pipelineId }, '', `?flow_id=${pipelineId}`);
-            updateSavedGraphsUI();
-        }
-
-        async function deletePipeline(pipelineId, event) {
-            event.stopPropagation();
-            if (window.confirm("Are you sure you want to delete this flow? This action cannot be undone and the pipeline will be permanently removed.")) {
-                try {
-                    const response = await fetch(`/api/v1/pipelines/${pipelineId}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' }
-                    });
-
-                    if (response.ok) {
-                        executeDeletionCleanup(pipelineId);
-                    } else {
-                        alert("Failed to delete the pipeline from the server.");
-                    }
-                } catch (error) {
-                    console.warn("Backend not active, deleting locally.", error);
-                    executeDeletionCleanup(pipelineId);
-                }
-            }
-        }
-
-        function executeDeletionCleanup(pipelineId) {
-            savedGraphsList = savedGraphsList.filter(g => g.id !== pipelineId);
-            delete localPipelinesStore[pipelineId];
-
-            localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
-            localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
-
-            if (currentPipelineId === pipelineId) {
-                clearCanvas(new Event('click'));
-            } else {
-                updateSavedGraphsUI();
-            }
-
-            const flowModal = document.getElementById('flow-manager-modal');
-            if (flowModal && !flowModal.classList.contains('hidden')) {
-                openFlowModal(null);
-            }
-        }
-
-        // ==========================================
-        // EXPORT & UTILS
+        // EXECUTING AND SAVING FLOWS (API)
         // ==========================================
         async function saveCurrentFlow() {
-            if (nodesData.length === 0) {
-                alert("Cannot save an empty workspace.");
-                return;
-            }
-            if (!currentPipelineId) {
-                alert("No active flow to save. Create one from the Flow Manager first.");
-                return;
-            }
+            if (nodesData.length === 0) return alert("Cannot save an empty workspace.");
+            if (!currentPipelineId) return alert("No active flow to save. Create one from the Flow Manager first.");
 
-            // 1. Define a global mapping of what key each node type outputs
-            // Now accepts the sourceNode and the handle it is outputting from
             const outputKeyMap = {
                 'telemetry': () => 'sensor_value',
                 'movingaverage': () => 'moving_average',
@@ -1569,40 +1363,21 @@
                 pipeline_id: currentPipelineId,
                 nodes: nodesData.map(n => {
                     const el = document.getElementById(n.id);
-                    const nodeCopy = { ...n, x: el.style.left, y: el.style.top };
+                    const nodeCopy = { ...n, x: el.style.left, y: el.style.top, config: n.config || {} };
 
-                    // Ensure config exists
-                    nodeCopy.config = nodeCopy.config || {};
-
-                    // 2. Find the primary incoming connection for this node
                     const incomingConn = connections.find(c => c.toNode === nodeCopy.id && c.toHandle === 'in');
-
                     if (incomingConn) {
                         const sourceNode = nodesData.find(sn => sn.id === incomingConn.fromNode);
-
-                        // 3. Dynamically assign the input_key based on the parent's output profile
-                        // We pass incomingConn.fromHandle so the map knows exactly which port was used
                         if (sourceNode && outputKeyMap[sourceNode.type]) {
                             nodeCopy.config.input_key = outputKeyMap[sourceNode.type](sourceNode, incomingConn.fromHandle);
                         } else {
-                            // Fallback for unknown node types
                             nodeCopy.config.input_key = 'default_payload';
                         }
                     }
-
-                    // Clean up any legacy hardcoded keys you might have left over
-                    if (nodeCopy.config.inputKey) {
-                        delete nodeCopy.config.inputKey;
-                    }
-
+                    if (nodeCopy.config.inputKey) delete nodeCopy.config.inputKey;
                     return nodeCopy;
                 }),
-                topology: connections.map(c => ({
-                    source: c.fromNode,
-                    target: c.toNode,
-                    trigger: c.fromHandle,
-                    targetHandle: c.toHandle
-                }))
+                topology: connections.map(c => ({ source: c.fromNode, target: c.toNode, trigger: c.fromHandle, targetHandle: c.toHandle }))
             };
 
             const saveBtn = document.getElementById('save-btn');
@@ -1613,25 +1388,14 @@
             try {
                 const response = await fetch('/api/v1/pipelines', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer YOUR_AUTH_TOKEN'
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer YOUR_AUTH_TOKEN' },
                     body: JSON.stringify(payload)
                 });
-
                 if (!response.ok) throw new Error('Save failed');
-                
-                const data = await response.json();
-                
-                // Show a quick success toast/alert
+
                 alert("Flow saved successfully!");
-                
-                // Refresh list if needed
                 fetchSavedGraphs();
             } catch (error) {
-                console.warn("Backend not active. Saving to local storage instead.", error);
-                
                 if (localPipelinesStore[currentPipelineId]) {
                     localPipelinesStore[currentPipelineId].nodes = payload.nodes;
                     localPipelinesStore[currentPipelineId].topology = payload.topology;
@@ -1644,110 +1408,65 @@
             }
         }
 
+        async function toggleRunFlow(forceState = null) {
+            const runBtn = document.getElementById('run-btn');
+            const btnText = runBtn.querySelector('span');
+
+            if (!currentPipelineId) return alert("Please Deploy or Load this pipeline before running it.");
+
+            const newState = forceState !== null ? forceState : !isFlowRunning;
+
+            if (!newState) {
+                // STOP FLOW
+                isFlowRunning = false;
+                btnText.innerText = "Run Flow";
+                runBtn.classList.replace('bg-red-50', 'bg-white');
+                runBtn.classList.replace('text-red-700', 'text-slate-600');
+                runBtn.innerHTML = `<svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg><span>Run Flow</span>`;
+
+                document.querySelectorAll('.wire-path').forEach(path => path.classList.remove('wire-flowing'));
+
+                try {
+                    await fetch('/api/v1/pipelines/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "stop", pipeline_id: currentPipelineId }) });
+                } catch (err) {}
+
+            } else {
+                // START FLOW
+                isFlowRunning = true;
+                btnText.innerText = "Stop Flow";
+                runBtn.classList.replace('bg-white', 'bg-red-50');
+                runBtn.classList.replace('text-slate-600', 'text-red-700');
+                runBtn.innerHTML = `<svg class="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><span>Stop Flow</span>`;
+
+                document.querySelectorAll('.wire-path').forEach(path => path.classList.add('wire-flowing'));
+
+                try {
+                    await fetch('/api/v1/pipelines/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "start", pipeline_id: currentPipelineId }) });
+                } catch (err) {}
+            }
+
+            // Sync List status state
+            const flowIndex = savedGraphsList.findIndex(f => f.id === currentPipelineId);
+            if (flowIndex > -1) {
+                savedGraphsList[flowIndex].isRunning = isFlowRunning;
+                localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
+                updateSavedGraphsUI();
+            }
+        }
+
         function clearCanvas(e) {
             if (e) e.stopPropagation();
             document.querySelectorAll('.node-card').forEach(node => node.remove());
             svgLayer.innerHTML = '';
             connections = [];
             nodesData = [];
-            if(isFlowRunning) toggleRunFlow();
-            currentPipelineId = null; // <--- RESET THE ID
+            if(isFlowRunning) toggleRunFlow(false);
+            currentPipelineId = null;
             emptyState.style.display = 'flex';
             showLibraryPanel();
-
-            // Remove the flow_id from the URL when the canvas is cleared
             window.history.pushState({}, '', window.location.pathname);
-            updateSavedGraphsUI();
         }
 
-        // ==========================================
-        // RUN FLOW EXECUTION
-        // ==========================================
-        let isFlowRunning = false;
-
-        async function toggleRunFlow() {
-            const runBtn = document.getElementById('run-btn');
-            const btnText = runBtn.querySelector('span');
-
-            // Validate: Ensure the pipeline has been deployed/saved first
-            if (!currentPipelineId) {
-                alert("Please Deploy or Load this pipeline before running it. The backend needs an ID.");
-                return;
-            }
-
-            if (isFlowRunning) {
-                // --- STOP THE FLOW ---
-                isFlowRunning = false;
-
-                // Update UI
-                btnText.innerText = "Run Flow";
-                runBtn.classList.replace('bg-red-50', 'bg-white');
-                runBtn.classList.replace('text-red-700', 'text-slate-600');
-                runBtn.innerHTML = `
-                    <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-                    <span>Run Flow</span>
-                `;
-
-                // Stop Wire Animations
-                document.querySelectorAll('.wire-path').forEach(path => {
-                    path.classList.remove('wire-flowing');
-                });
-
-                // Send STOP command to backend
-                const payload = { action: "stop", pipeline_id: currentPipelineId };
-
-                try {
-                    await fetch('/api/v1/pipelines/run', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    console.log("Flow stopped on backend.", payload);
-                } catch (err) {
-                    console.log("Offline mode: Flow stopped visually.", payload);
-                }
-
-            } else {
-                // --- START THE FLOW ---
-                isFlowRunning = true;
-
-                // Update UI
-                btnText.innerText = "Stop Flow";
-                runBtn.classList.replace('bg-white', 'bg-red-50');
-                runBtn.classList.replace('text-slate-600', 'text-red-700');
-                runBtn.innerHTML = `
-                    <svg class="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                    <span>Stop Flow</span>
-                `;
-
-                // Start Wire Animations
-                document.querySelectorAll('.wire-path').forEach(path => {
-                    path.classList.add('wire-flowing');
-                });
-
-                // Send START command to backend
-                const payload = { action: "start", pipeline_id: currentPipelineId };
-
-                try {
-                    console.log("Sending run command to backend...", payload);
-                    const response = await fetch('/api/v1/pipelines/run', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if(response.ok) {
-                        const data = await response.json();
-                        console.log("Backend stream started:", data);
-                    }
-                } catch (err) {
-                    console.log("Offline mode: Flow started visually.", payload);
-                }
-            }
-        }
-
-        // ==========================================
-        // SIDEBAR TOGGLE
-        // ==========================================
         function toggleBlocksSidebar() {
             const sidebar = document.getElementById('blocks-sidebar');
             const btnText = document.querySelector('#sidebar-toggle-btn span');
