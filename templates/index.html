@@ -129,7 +129,7 @@
                 </div>
 
                 <div id="main-saved-flows-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    </div>
+                </div>
             </div>
         </div>
 
@@ -148,7 +148,7 @@
                         <span>Run Flow</span>
                     </button>
                     <button onclick="saveCurrentFlow()" id="save-btn" class="pointer-events-auto px-3 py-1.5 bg-indigo-600 shadow-sm rounded-md text-sm font-medium text-white hover:bg-indigo-700">Save Flow</button>
-                    <button class="pointer-events-auto px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-1 ml-4" onclick="clearCanvas(event)">
+                    <button class="pointer-events-auto px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-1 ml-4" onclick="clearCanvas(event, true)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Clear
                     </button>
                 </div>
@@ -375,10 +375,23 @@
         // ==========================================
         async function fetchSavedGraphs() {
             try {
+                // Pre-load local state to preserve 'isRunning' flags over API sync
+                const localList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
+
                 const response = await fetch('/api/v1/pipelines', { headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' } });
                 if (response.ok) {
                     const data = await response.json();
-                    savedGraphsList = data.data || [];
+                    let fetchedList = data.data || [];
+
+                    // Merge local isRunning state into fetched data so it survives reloads
+                    savedGraphsList = fetchedList.map(flow => {
+                        const existingLocal = localList.find(l => l.id === flow.id);
+                        if (existingLocal && existingLocal.isRunning !== undefined) {
+                            flow.isRunning = existingLocal.isRunning;
+                        }
+                        return flow;
+                    });
+
                     savedGraphsList.forEach(graph => { localPipelinesStore[graph.id] = graph; });
                     localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
                     localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
@@ -576,12 +589,15 @@
 
             if (!pipelineData) return alert("Pipeline data could not be found.");
 
-            clearCanvas(new Event('click'));
+            clearCanvas(new Event('click'), false); // Don't wipe URL history yet
             currentPipelineId = pipelineId;
             emptyState.style.display = 'none';
 
             const flowIndex = savedGraphsList.findIndex(f => f.id === pipelineId);
-            if (flowIndex > -1 && savedGraphsList[flowIndex].isRunning) toggleRunFlow(true);
+            if (flowIndex > -1 && savedGraphsList[flowIndex].isRunning) {
+                // Pass true for silentAPI so we just update the UI without hitting the backend to start it again
+                toggleRunFlow(true, true);
+            }
 
             let maxId = 0;
 
@@ -958,7 +974,7 @@
         });
 
         // ==========================================
-        // SETTINGS & NODE LOGIC (API INTEGRATED)
+        // SETTINGS & NODE LOGIC
         // ==========================================
         const panelLibrary = document.getElementById('panel-library');
         const panelSettings = document.getElementById('panel-settings');
@@ -1408,7 +1424,7 @@
             }
         }
 
-        async function toggleRunFlow(forceState = null) {
+        async function toggleRunFlow(forceState = null, silentAPI = false) {
             const runBtn = document.getElementById('run-btn');
             const btnText = runBtn.querySelector('span');
 
@@ -1419,30 +1435,31 @@
             if (!newState) {
                 // STOP FLOW
                 isFlowRunning = false;
-                btnText.innerText = "Run Flow";
                 runBtn.classList.replace('bg-red-50', 'bg-white');
                 runBtn.classList.replace('text-red-700', 'text-slate-600');
                 runBtn.innerHTML = `<svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg><span>Run Flow</span>`;
 
                 document.querySelectorAll('.wire-path').forEach(path => path.classList.remove('wire-flowing'));
 
-                try {
-                    await fetch('/api/v1/pipelines/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "stop", pipeline_id: currentPipelineId }) });
-                } catch (err) {}
-
+                if (!silentAPI) {
+                    try {
+                        await fetch('/api/v1/pipelines/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "stop", pipeline_id: currentPipelineId }) });
+                    } catch (err) {}
+                }
             } else {
                 // START FLOW
                 isFlowRunning = true;
-                btnText.innerText = "Stop Flow";
                 runBtn.classList.replace('bg-white', 'bg-red-50');
                 runBtn.classList.replace('text-slate-600', 'text-red-700');
                 runBtn.innerHTML = `<svg class="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><span>Stop Flow</span>`;
 
                 document.querySelectorAll('.wire-path').forEach(path => path.classList.add('wire-flowing'));
 
-                try {
-                    await fetch('/api/v1/pipelines/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "start", pipeline_id: currentPipelineId }) });
-                } catch (err) {}
+                if (!silentAPI) {
+                    try {
+                        await fetch('/api/v1/pipelines/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "start", pipeline_id: currentPipelineId }) });
+                    } catch (err) {}
+                }
             }
 
             // Sync List status state
@@ -1454,17 +1471,27 @@
             }
         }
 
-        function clearCanvas(e) {
+        function clearCanvas(e, isManual = false) {
             if (e) e.stopPropagation();
             document.querySelectorAll('.node-card').forEach(node => node.remove());
             svgLayer.innerHTML = '';
             connections = [];
             nodesData = [];
-            if(isFlowRunning) toggleRunFlow(false);
+
+            // Disconnect visual state without hitting the API to avoid accidentally stopping workflows on view switch
+            isFlowRunning = false;
+            const runBtn = document.getElementById('run-btn');
+            runBtn.classList.replace('bg-red-50', 'bg-white');
+            runBtn.classList.replace('text-red-700', 'text-slate-600');
+            runBtn.innerHTML = `<svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg><span>Run Flow</span>`;
+
             currentPipelineId = null;
             emptyState.style.display = 'flex';
             showLibraryPanel();
-            window.history.pushState({}, '', window.location.pathname);
+
+            if (isManual) {
+                window.history.pushState({}, '', window.location.pathname);
+            }
         }
 
         function toggleBlocksSidebar() {
