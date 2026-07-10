@@ -153,13 +153,6 @@
                     </button>
                 </div>
 
-                <div class="absolute top-4 right-4 z-20 flex gap-2 items-center pointer-events-none">
-                    <button onclick="toggleBlocksSidebar()" id="sidebar-toggle-btn" class="pointer-events-auto px-3 py-1.5 bg-white border border-slate-200 shadow-sm rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        <span>Hide Blocks</span>
-                    </button>
-                </div>
-
                 <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none z-10">
                     <svg class="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     <h2 class="text-lg font-medium text-slate-500">Workspace is empty</h2>
@@ -174,7 +167,7 @@
 
             </div>
 
-            <aside id="blocks-sidebar" class="w-80 bg-white border-l border-slate-200 flex flex-col shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.02)] z-30 shrink-0 transition-[width,border-width,opacity] duration-300 overflow-hidden">
+            <aside id="blocks-sidebar" class="absolute bottom-24 right-8 w-80 h-[70vh] bg-white rounded-2xl border border-slate-200 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.12)] z-40 transition-all duration-300 overflow-hidden transform origin-bottom-right scale-100 opacity-100 pointer-events-auto">
                 <div id="panel-library" class="flex flex-col h-full">
                     <div class="h-14 flex items-center px-4 border-b border-slate-200 bg-slate-50">
                         <div class="text-sm font-semibold text-slate-800">Available Blocks</div>
@@ -266,8 +259,11 @@
                         </button>
                     </div>
                 </div>
-
             </aside>
+
+            <button onclick="toggleBlocksSidebar()" id="sidebar-toggle-btn" class="absolute bottom-8 right-8 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg shadow-indigo-200 flex items-center justify-center hover:bg-indigo-700 hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all z-50 pointer-events-auto">
+                <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
     </main>
 
@@ -1510,19 +1506,25 @@
 
         function toggleBlocksSidebar() {
             const sidebar = document.getElementById('blocks-sidebar');
-            const btnText = document.querySelector('#sidebar-toggle-btn span');
-            const btnIconPath = document.querySelector('#sidebar-toggle-btn svg path');
+            const btnIconPath = document.querySelector('#sidebar-toggle-btn svg');
 
-            if (sidebar.classList.contains('w-80')) {
-                sidebar.classList.replace('w-80', 'w-0');
-                sidebar.classList.replace('border-l', 'border-l-0');
-                btnText.textContent = 'Show Blocks';
-                btnIconPath.setAttribute('d', 'M15 19l-7-7 7-7');
+            // If it's currently open (scale-100)
+            if (sidebar.classList.contains('scale-100')) {
+                // Collapse into the button
+                sidebar.classList.replace('scale-100', 'scale-0');
+                sidebar.classList.replace('opacity-100', 'opacity-0');
+                sidebar.classList.add('pointer-events-none');
+
+                // Change icon to hamburger menu (Open state)
+                btnIconPath.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>';
             } else {
-                sidebar.classList.replace('w-0', 'w-80');
-                sidebar.classList.replace('border-l-0', 'border-l');
-                btnText.textContent = 'Hide Blocks';
-                btnIconPath.setAttribute('d', 'M9 5l7 7-7 7');
+                // Expand from the button
+                sidebar.classList.replace('scale-0', 'scale-100');
+                sidebar.classList.replace('opacity-0', 'opacity-100');
+                sidebar.classList.remove('pointer-events-none');
+
+                // Change icon back to X (Close state)
+                btnIconPath.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>';
             }
         }
     </script>
