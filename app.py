@@ -186,15 +186,59 @@ def run_pipeline():
 
 
 # --- Delete a Pipeline Route ---
+# --- Delete a Pipeline Route ---
 @app.route('/api/v1/pipelines/<pipeline_id>', methods=['DELETE'])
 def delete_pipeline(pipeline_id):
     try:
-        result = signal_flow.delete_one({"_id": ObjectId(pipeline_id)})
+        obj_id = ObjectId(pipeline_id)
+
+        # 1. Fetch the pipeline before deleting to check for hardware relay nodes
+        pipeline = signal_flow.find_one({"_id": obj_id})
+
+        if not pipeline:
+            return jsonify({"status": "error", "message": "Pipeline not found"}), 404
+
+        # 2. Scan nodes for 'edgecommand' and release their assigned channels
+        nodes = pipeline.get("nodes", [])
+        for node in nodes:
+            if node.get("type") == "edgecommand":
+                config = node.get("config", {})
+                board_key = config.get("boardKey")
+                channel = config.get("channel")
+
+                if board_key and channel is not None:
+                    try:
+                        channel_idx = int(channel)
+
+                        # Find the hardware document for this specific board
+                        doc = hardware_relay.find_one({"boardKey": board_key})
+                        if doc:
+                            taken_channels = doc.get("taken_channels", [0] * 8)
+
+                            # Ensure the channel index is within valid bounds before releasing
+                            if 0 <= channel_idx < len(taken_channels):
+                                taken_channels[channel_idx] = 0  # 0 denotes available
+
+                                hardware_relay.update_one(
+                                    {"_id": doc["_id"]},
+                                    {
+                                        "$set": {
+                                            "taken_channels": taken_channels,
+                                            "updatedAt": datetime.now(timezone.utc)
+                                        }
+                                    }
+                                )
+                    except ValueError:
+                        # Pass gracefully if the channel value was corrupted or not an integer
+                        pass
+
+        # 3. Delete the pipeline document
+        result = signal_flow.delete_one({"_id": obj_id})
 
         if result.deleted_count == 1:
-            return jsonify({"status": "success", "message": "Pipeline deleted"}), 200
+            return jsonify({"status": "success", "message": "Pipeline deleted and hardware channels released"}), 200
         else:
-            return jsonify({"status": "error", "message": "Pipeline not found"}), 404
+            return jsonify({"status": "error", "message": "Pipeline could not be deleted"}), 500
 
     except Exception as e:
         print(f"Error deleting pipeline {pipeline_id}: {e}")
