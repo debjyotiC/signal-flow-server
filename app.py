@@ -54,23 +54,22 @@ def get_metadata():
 def get_all_pipelines():
     try:
         user_id = get_user_id(USERNAME)
-        
-        # Fetch all user pipelines, but only grab the title and deployment date to save bandwidth
+
+        # Include 'active' in the projection
         cursor = signal_flow.find(
             {"userId": user_id},
-            {"title": 1, "deployedAt": 1}
-        ).sort("deployedAt", -1)  # Sort newest first
+            {"title": 1, "deployedAt": 1, "active": 1}
+        ).sort("deployedAt", -1)
 
         formatted_data = []
         for doc in cursor:
             formatted_data.append({
                 "id": str(doc["_id"]),
                 "title": doc.get("title", "Untitled Pipeline"),
-                # The frontend expects 'timestamp' to format the date correctly
-                "timestamp": doc.get("deployedAt", datetime.now(timezone.utc)).isoformat()
+                "timestamp": doc.get("deployedAt", datetime.now(timezone.utc)).isoformat(),
+                "isRunning": doc.get("active", False)  # Map DB state to frontend state
             })
 
-        # Return the exact JSON structure your frontend fetchSavedGraphs() expects
         return jsonify({
             "status": "success",
             "data": formatted_data
@@ -85,13 +84,11 @@ def get_all_pipelines():
 @app.route('/api/v1/pipelines/<pipeline_id>', methods=['GET'])
 def get_single_pipeline(pipeline_id):
     try:
-        # Search the database using the MongoDB ObjectId
         pipeline = signal_flow.find_one({"_id": ObjectId(pipeline_id)})
 
         if not pipeline:
             return jsonify({"status": "error", "message": "Pipeline not found"}), 404
 
-        # Map the database document to the JSON structure your loadPipeline() function expects
         formatted_pipeline = {
             "id": str(pipeline["_id"]),
             "title": pipeline.get("title"),
@@ -99,7 +96,8 @@ def get_single_pipeline(pipeline_id):
             "platform": pipeline.get("platform"),
             "nodes": pipeline.get("nodes", []),
             "topology": pipeline.get("topology", []),
-            "timestamp": pipeline.get("deployedAt", datetime.now(timezone.utc)).isoformat()
+            "timestamp": pipeline.get("deployedAt", datetime.now(timezone.utc)).isoformat(),
+            "isRunning": pipeline.get("active", False) # Add execution state here
         }
 
         return jsonify({
@@ -125,7 +123,7 @@ def save_pipeline():
             "nodes": data.get('nodes', []),
             "topology": data.get('topology', []),
             "deployedAt": datetime.now(timezone.utc),
-            "active": False
+            "active": False # Returned flow status to the front end
         }
 
         pipeline_id = data.get('pipeline_id')

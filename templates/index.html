@@ -371,28 +371,19 @@
         // ==========================================
         async function fetchSavedGraphs() {
             try {
-                // Pre-load local state to preserve 'isRunning' flags over API sync
-                const localList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
-
                 const response = await fetch('/api/v1/pipelines', { headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' } });
                 if (response.ok) {
                     const data = await response.json();
-                    let fetchedList = data.data || [];
 
-                    // Merge local isRunning state into fetched data so it survives reloads
-                    savedGraphsList = fetchedList.map(flow => {
-                        const existingLocal = localList.find(l => l.id === flow.id);
-                        if (existingLocal && existingLocal.isRunning !== undefined) {
-                            flow.isRunning = existingLocal.isRunning;
-                        }
-                        return flow;
-                    });
+                    // Directly use the backend data as the single source of truth
+                    savedGraphsList = data.data || [];
 
                     savedGraphsList.forEach(graph => { localPipelinesStore[graph.id] = graph; });
                     localStorage.setItem('signalflow_pipelines_store', JSON.stringify(localPipelinesStore));
                     localStorage.setItem('signalflow_graphs_list', JSON.stringify(savedGraphsList));
                 } else throw new Error("Backend unavailable.");
             } catch(e) {
+                // Fallback to local storage only if offline/error
                 savedGraphsList = JSON.parse(localStorage.getItem('signalflow_graphs_list')) || [];
                 localPipelinesStore = JSON.parse(localStorage.getItem('signalflow_pipelines_store')) || {};
             } finally {
@@ -589,8 +580,11 @@
             currentPipelineId = pipelineId;
             emptyState.style.display = 'none';
 
-            const flowIndex = savedGraphsList.findIndex(f => f.id === pipelineId);
-            if (flowIndex > -1 && savedGraphsList[flowIndex].isRunning) {
+            // Set the internal flow state immediately based on the backend truth
+            isFlowRunning = pipelineData.isRunning || false;
+
+            // Trigger the UI updates silently to sync the button and wires
+            if (isFlowRunning) {
                 // Pass true for silentAPI so we just update the UI without hitting the backend to start it again
                 toggleRunFlow(true, true);
             }
