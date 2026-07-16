@@ -242,29 +242,37 @@ def delete_pipeline(pipeline_id):
         print(f"Error deleting pipeline {pipeline_id}: {e}")
         return jsonify({"status": "error", "message": "Internal server error"}), 500
 
+# TODO: Modified for implementation in production
 @app.route('/api/v1/hardware/channels', methods=['GET'])
 def get_hardware_channel():
     try:
         board_key = request.args.get("board_key")
+        current_channel = request.args.get("current_channel")  # Grab the current channel from the URL
+
         if not board_key:
             return jsonify({"status": "error", "message": "board_key is required"}), 400
-            
+
         doc = hardware_relay.find_one({"boardKey": board_key})
         if not doc:
             r = {
                 "user_id": get_user_id(USERNAME),
-                "boardKey" : board_key,
+                "boardKey": board_key,
                 "channel_values": [],
-                "taken_channels": [0,0,0,0,0,0,0,0],
+                "taken_channels": [0, 0, 0, 0, 0, 0, 0, 0],
                 "updatedAt": datetime.now(timezone.utc)
             }
             hardware_relay.insert_one(r)
             doc = r
-            
+
         taken_channels = doc.get("taken_channels", [])
-        # 0 denotes available, 1 denotes taken. Return indices of available channels.
-        available_channels = [str(i) for i, is_taken in enumerate(taken_channels) if is_taken == 0]
-        
+
+        # 0 denotes available, 1 denotes taken.
+        # Return indices of available channels PLUS the one currently assigned to this block.
+        available_channels = [
+            str(i) for i, is_taken in enumerate(taken_channels)
+            if is_taken == 0 or str(i) == str(current_channel)
+        ]
+
         return jsonify(available_channels), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
