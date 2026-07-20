@@ -563,85 +563,85 @@
         }
 
         async function loadPipeline(pipelineId) {
-            let pipelineData;
-            try {
-                const response = await fetch(`/api/v1/pipelines/${pipelineId}`, { headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' } });
-                if(response.ok) {
-                    const data = await response.json();
-                    pipelineData = data.pipeline || data;
-                } else throw new Error("Backend load failed");
-            } catch (e) {
-                pipelineData = localPipelinesStore[pipelineId];
-            }
+    let pipelineData;
+    try {
+        const response = await fetch(`/api/v1/pipelines/${pipelineId}`, { headers: { 'Authorization': 'Bearer YOUR_AUTH_TOKEN' } });
+        if(response.ok) {
+            const data = await response.json();
+            pipelineData = data.pipeline || data;
+        } else throw new Error("Backend load failed");
+    } catch (e) {
+        pipelineData = localPipelinesStore[pipelineId];
+    }
 
-            if (!pipelineData) return alert("Pipeline data could not be found.");
+    if (!pipelineData) return alert("Pipeline data could not be found.");
 
-            clearCanvas(new Event('click'), false); // Don't wipe URL history yet
-            currentPipelineId = pipelineId;
-            emptyState.style.display = 'none';
+    clearCanvas(new Event('click'), false); // Don't wipe URL history yet
+    currentPipelineId = pipelineId;
+    emptyState.style.display = 'none';
 
-            // Set the internal flow state immediately based on the backend truth
-            isFlowRunning = pipelineData.isRunning || false;
+    // Set the internal flow state immediately based on the backend truth
+    isFlowRunning = pipelineData.isRunning || false;
 
-            // Trigger the UI updates silently to sync the button and wires
-            if (isFlowRunning) {
-                // Pass true for silentAPI so we just update the UI without hitting the backend to start it again
-                toggleRunFlow(true, true);
-            }
+    // Trigger the UI updates silently to sync the button and wires
+    if (isFlowRunning) {
+        // Pass true for silentAPI so we just update the UI without hitting the backend to start it again
+        toggleRunFlow(true, true);
+    }
 
-            let maxId = 0;
+    let maxId = 0;
 
-            pipelineData.nodes.forEach(n => {
-                instantiateNode(n.type, n.x || '100px', n.y || '100px', n.id);
-                const nodeIndex = nodesData.findIndex(nd => nd.id === n.id);
-                if(nodeIndex !== -1) {
-                    nodesData[nodeIndex].config = n.config || {};
-                    const config = nodesData[nodeIndex].config;
-                    const el = document.getElementById(n.id);
+    pipelineData.nodes.forEach(n => {
+        instantiateNode(n.type, n.x || '100px', n.y || '100px', n.id);
+        const nodeIndex = nodesData.findIndex(nd => nd.id === n.id);
+        if(nodeIndex !== -1) {
+            nodesData[nodeIndex].config = n.config || {};
+            const config = nodesData[nodeIndex].config;
+            const el = document.getElementById(n.id);
 
-                    if (n.type === 'telemetry') {
-                        if(config.targetHardware) el.querySelector('.node-title').innerText = config.targetHardware;
-                        if(config.activeSensor) el.querySelector('.node-subtitle').innerText = `Sensor: ${config.activeSensor}`;
-                    } else if (n.type === 'edgecommand') {
-                        const keyEl = document.getElementById(`${n.id}-display-key`);
-                        const chEl = document.getElementById(`${n.id}-display-channel`);
-                        const actEl = document.getElementById(`${n.id}-display-action`);
-                        if (keyEl) keyEl.innerText = config.boardKey ? config.boardKey : 'Unconfigured';
-                        if (chEl) chEl.innerText = `CH ${config.channel || '0'}`;
-                        if (actEl) {
-                            if (config.actionType === 'Value') actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
-                            else actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
-                        }
-                    }
+            if (n.type === 'telemetry') {
+                if(config.targetHardware) el.querySelector('.node-title').innerText = config.targetHardware;
+                if(config.activeSensor) el.querySelector('.node-subtitle').innerText = `Sensor: ${config.activeSensor}`;
+            } else if (n.type === 'edgecommand') {
+                const keyEl = document.getElementById(`${n.id}-display-key`);
+                const chEl = document.getElementById(`${n.id}-display-channel`);
+                const actEl = document.getElementById(`${n.id}-display-action`);
+                if (keyEl) keyEl.innerText = config.boardKey ? config.boardKey : 'Unconfigured';
+                if (chEl) chEl.innerText = `CH ${config.channel || '0'}`;
+                if (actEl) {
+                    if (config.actionType === 'Value') actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
+                    else actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
                 }
-                const idNum = parseInt(n.id.replace('node-', ''));
-                if(!isNaN(idNum) && idNum > maxId) maxId = idNum;
-            });
-
-            nodeIdCounter = maxId + 1;
-
-            pipelineData.topology.forEach(t => {
-                const connId = `conn-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
-                const toHandle = t.targetHandle || 'in';
-
-                connections.push({ id: connId, fromNode: t.source, fromHandle: t.trigger, toNode: t.target, toHandle: toHandle });
-
-                const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                tempLine.id = connId;
-                if(t.trigger === 'out-true') tempLine.setAttribute('stroke', '#ef4444');
-                else tempLine.setAttribute('stroke', '#64748b');
-                tempLine.setAttribute('stroke-width', '2');
-                tempLine.setAttribute('fill', 'none');
-                tempLine.classList.add('wire-path');
-                if (isFlowRunning) tempLine.classList.add('wire-flowing');
-                svgLayer.appendChild(tempLine);
-            });
-
-            setTimeout(() => { redrawAllConnections(); }, 50);
-
-            window.history.pushState({ id: pipelineId }, '', `?flow_id=${pipelineId}`);
-            updateSavedGraphsUI();
+            }
         }
+        const idNum = parseInt(n.id.replace('node-', ''));
+        if(!isNaN(idNum) && idNum > maxId) maxId = idNum;
+    });
+
+    nodeIdCounter = maxId + 1;
+
+    pipelineData.topology.forEach(t => {
+        const connId = `conn-${Date.now()}-${Math.random().toString(36).substr(2,9)}`;
+        const toHandle = t.targetHandle || 'in';
+
+        connections.push({ id: connId, fromNode: t.source, fromHandle: t.trigger, toNode: t.target, toHandle: toHandle });
+
+        const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        tempLine.id = connId;
+        if(t.trigger === 'out-true') tempLine.setAttribute('stroke', '#ef4444');
+        else tempLine.setAttribute('stroke', '#64748b');
+        tempLine.setAttribute('stroke-width', '2');
+        tempLine.setAttribute('fill', 'none');
+        tempLine.classList.add('wire-path');
+        if (isFlowRunning) tempLine.classList.add('wire-flowing');
+        svgLayer.appendChild(tempLine);
+    });
+
+    setTimeout(() => { redrawAllConnections(); }, 50);
+
+    window.history.pushState({ id: pipelineId }, '', `?flow_id=${pipelineId}`);
+    updateSavedGraphsUI();
+}
 
         // ==========================================
         // DRAG & DROP WIRING ENGINE (SCROLL AWARE)
