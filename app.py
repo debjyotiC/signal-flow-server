@@ -184,7 +184,6 @@ def run_pipeline():
 
 
 # --- Delete a Pipeline Route ---
-# --- Delete a Pipeline Route ---
 @app.route('/api/v1/pipelines/<pipeline_id>', methods=['DELETE'])
 def delete_pipeline(pipeline_id):
     try:
@@ -211,7 +210,7 @@ def delete_pipeline(pipeline_id):
                         # Find the hardware document for this specific board
                         doc = hardware_relay.find_one({"boardKey": board_key})
                         if doc:
-                            taken_channels = doc.get("taken_channels", [0] * 8)
+                            taken_channels = doc.get("takenChannels", [0] * 8)
 
                             # Ensure the channel index is within valid bounds before releasing
                             if 0 <= channel_idx < len(taken_channels):
@@ -221,7 +220,7 @@ def delete_pipeline(pipeline_id):
                                     {"_id": doc["_id"]},
                                     {
                                         "$set": {
-                                            "taken_channels": taken_channels,
+                                            "takenChannels": taken_channels,
                                             "updatedAt": datetime.now(timezone.utc)
                                         }
                                     }
@@ -253,18 +252,19 @@ def get_hardware_channel():
             return jsonify({"status": "error", "message": "board_key is required"}), 400
 
         doc = hardware_relay.find_one({"boardKey": board_key})
+
         if not doc:
             r = {
-                "user_id": get_user_id(USERNAME),
+                "userId": get_user_id(USERNAME),
                 "boardKey": board_key,
-                "channel_values": [],
-                "taken_channels": [0, 0, 0, 0, 0, 0, 0, 0],
+                "channelValues": [],
+                "takenChannels": [0, 0, 0, 0, 0, 0, 0, 0],
                 "updatedAt": datetime.now(timezone.utc)
             }
             hardware_relay.insert_one(r)
             doc = r
 
-        taken_channels = doc.get("taken_channels", [])
+        taken_channels = doc.get("takenChannels", [])
 
         # 0 denotes available, 1 denotes taken.
         # Return indices of available channels PLUS the one currently assigned to this block.
@@ -272,6 +272,8 @@ def get_hardware_channel():
             str(i) for i, is_taken in enumerate(taken_channels)
             if is_taken == 0 or str(i) == str(current_channel)
         ]
+
+        print(available_channels)
 
         return jsonify(available_channels), 200
     except Exception as e:
@@ -290,7 +292,7 @@ def take_hardware_channel():
 
         doc = hardware_relay.find_one({"boardKey": board_key})
         if doc:
-            taken_channels = doc.get("taken_channels", [0]*8)
+            taken_channels = doc.get("takenChannels", [0]*8)
             
             # If the user changed channels, release the previous one
             if prev_channel is not None and 0 <= prev_channel < len(taken_channels):
@@ -302,7 +304,7 @@ def take_hardware_channel():
                 
             hardware_relay.update_one(
                 {"_id": doc["_id"]},
-                {"$set": {"taken_channels": taken_channels, "updatedAt": datetime.now(timezone.utc)}}
+                {"$set": {"takenChannels": taken_channels, "updatedAt": datetime.now(timezone.utc)}}
             )
             return jsonify({"status": "success", "message": "Channel assignment updated"}), 200
         else:
