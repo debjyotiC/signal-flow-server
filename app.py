@@ -3,6 +3,10 @@ from os import environ
 from datetime import datetime, timezone
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+import requests
+import json
+import re
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -19,9 +23,40 @@ sensors = db["sensors"]
 signal_flow = db["signalFlow"]
 hardware_relay = db["hardwareRelay"]
 
+LOGS_URL = "https://loki.consentiumiot.com/loki/api/v1/query_range"
+
 def get_user_id(username):
     user = users.find_one({"username": username})
     return user.get("_id") if user else None
+
+
+def get_logs_for_flow(logs, target_flow_id, detection_level):
+    filtered_logs = []
+    log_pattern = re.compile(r"\[([a-f0-9]{24})(?:\s*\|\s*([^\]]+))?\]\s*(.*)")
+
+    for timestamp, raw_message in logs:
+        match = log_pattern.search(raw_message)
+
+        if match:
+            extracted_flow_id = match.group(1)
+
+            # Only process if the log belongs to the requested flow ID
+            if extracted_flow_id == target_flow_id:
+                node_id = match.group(2)
+                actual_message = match.group(3)
+
+                log_entry = {
+                    "detection_level": detection_level,
+                    "timestamp": timestamp,
+                    "message": actual_message.strip()
+                }
+
+                if node_id:
+                    log_entry["node"] = node_id.strip()
+
+                filtered_logs.append(log_entry)
+
+    return filtered_logs
 
 @app.route('/')
 def index():
@@ -312,6 +347,25 @@ def take_hardware_channel():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/v1/pipelines/<pipeline_id>/logs', methods=['GET'])
+def get_pipeline_logs(pipeline_id):
+    params = {
+        'query': '{application="flow-execution-engine"}',
+        'limit': 50,
+    }
+    response = requests.get(LOGS_URL, params=params).json()
+    try:
+        logs = response["data"]["result"][0]["values"]
+        detection_level = response["data"]["result"][0]["stream"]["detected_level"]
+
+        filtered_logs = get_logs_for_flow(logs, pipeline_id, detection_level)
+
+        return jsonify(filtered_logs), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": "Internal server error"}), 500
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5050)
