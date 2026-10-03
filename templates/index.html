@@ -656,8 +656,31 @@
                     const el = document.getElementById(n.id);
 
                     if (n.type === 'telemetry') {
+                        // Migration from old single sensor format if needed
+                        if (config.activeSensor && !config.activeSensors) {
+                            config.activeSensors = [config.activeSensor];
+                            delete config.activeSensor;
+                        }
+
                         if(config.targetHardware) el.querySelector('.node-title').innerText = config.targetHardware;
-                        if(config.activeSensor) el.querySelector('.node-subtitle').innerText = `Sensor: ${config.activeSensor}`;
+                        if(config.activeSensors) el.querySelector('.node-subtitle').innerText = `${config.activeSensors.length} Sensors`;
+
+                        const outputsContainer = el.querySelector('.sensor-outputs-container');
+                        if (outputsContainer && config.activeSensors && config.activeSensors.length > 0) {
+                            outputsContainer.innerHTML = '';
+                            config.activeSensors.forEach((sensor, idx) => {
+                                const isLast = idx === config.activeSensors.length - 1;
+                                const roundedClass = isLast ? 'rounded-b-xl' : '';
+                                const borderClass = isLast ? '' : 'border-b border-slate-100';
+                                const bgClass = (idx % 2 === 0) ? 'bg-slate-50/50' : 'bg-white';
+                                outputsContainer.innerHTML += `
+                                    <div class="px-3 py-2.5 ${bgClass} ${borderClass} ${roundedClass} relative flex justify-between pointer-events-none">
+                                        <span class="text-slate-600 truncate pr-4">${sensor}</span>
+                                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-blue-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${n.id}" data-handle="out-${sensor}" style="z-index:20;"></div>
+                                    </div>
+                                `;
+                            });
+                        }
                     } else if (n.type === 'edgecommand') {
                         const keyEl = document.getElementById(`${n.id}-display-key`);
                         const chEl = document.getElementById(`${n.id}-display-channel`);
@@ -903,10 +926,15 @@
                     <button onclick="showSettingsPanel('${id}', 'telemetry', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
                     <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
                         <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
-                        <div class="flex-1 min-w-0 pr-12"><h3 class="node-title text-sm font-bold text-slate-800 leading-tight truncate">Data Source</h3><p class="node-subtitle text-[11px] font-semibold text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded mt-0.5 border border-blue-100">Unconfigured</p></div>
+                        <div class="flex-1 min-w-0 pr-12">
+                            <h3 class="node-title text-sm font-bold text-slate-800 leading-tight truncate">Data Source</h3>
+                            <p class="node-subtitle text-[11px] font-semibold text-blue-600 bg-blue-50 inline-block px-1.5 py-0.5 rounded mt-0.5 border border-blue-100">Unconfigured</p>
+                        </div>
                     </div>
-                    <div class="px-3 py-2 bg-slate-50/50 rounded-b-xl relative">
-                        <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
+                    <div class="sensor-outputs-container flex flex-col text-[11px] font-semibold">
+                        <div class="px-3 py-2 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
+                            <span class="text-slate-500 italic">Configure to add sensors</span>
+                        </div>
                     </div>
                 </div>`,
 
@@ -1245,16 +1273,19 @@
 
                     const getBoardKey = (deviceName) => (payload[deviceName] && payload[deviceName].key) || '';
 
+                    const activeSensors = config.activeSensors || [];
+
                     const generateSensorHTML = (deviceName) => {
                         const deviceObj = payload[deviceName] || {};
                         const sensors = deviceObj.sensors || [];
                         if (sensors.length === 0) return '<div class="p-3 text-xs text-slate-500">No sensors found.</div>';
 
+                        let anyChecked = sensors.some(s => activeSensors.includes(s));
                         return sensors.map((sensor, index) => {
-                            const isChecked = config.activeSensor === sensor || (!config.activeSensor && index === 0);
+                            const isChecked = activeSensors.includes(sensor) || (!anyChecked && index === 0);
                             return `
                             <label class="flex items-center gap-3 px-3 py-2 border-b border-slate-200 hover:bg-slate-100 cursor-pointer transition-colors">
-                                <input type="radio" name="setting-activeSensor" value="${sensor}" ${isChecked ? 'checked' : ''} class="text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300">
+                                <input type="checkbox" name="setting-activeSensors" value="${sensor}" ${isChecked ? 'checked' : ''} class="text-indigo-600 focus:ring-indigo-500 w-4 h-4 border-slate-300 rounded">
                                 <span class="text-sm text-slate-700 font-medium">${sensor}</span>
                             </label>`;
                         }).join('');
@@ -1540,9 +1571,12 @@
 
             const config = {};
             const inputs = settingsContent.querySelectorAll('input, select, textarea');
+            const activeSensors = [];
 
             inputs.forEach(input => {
-                if (input.type === 'radio') {
+                if (input.type === 'checkbox' && input.name === 'setting-activeSensors') {
+                    if (input.checked) activeSensors.push(input.value);
+                } else if (input.type === 'radio') {
                     if (input.checked && input.name.startsWith('setting-')) {
                         config[input.name.replace('setting-', '')] = input.value;
                     }
@@ -1550,6 +1584,10 @@
                     config[input.id.replace('setting-', '')] = input.type === 'checkbox' ? input.checked : input.value;
                 }
             });
+
+            if (settingsContent.querySelector('input[name="setting-activeSensors"]')) {
+                config.activeSensors = activeSensors;
+            }
 
             nodesData[nodeIndex].config = config;
 
@@ -1560,7 +1598,32 @@
                 const titleEl = nodeEl.querySelector('.node-title');
                 const subtitleEl = nodeEl.querySelector('.node-subtitle');
                 if (titleEl) titleEl.innerText = config.targetHardware || 'Data Source';
-                if (subtitleEl) subtitleEl.innerText = config.activeSensor ? `Sensor: ${config.activeSensor}` : 'Unconfigured';
+                if (subtitleEl) subtitleEl.innerText = (config.activeSensors && config.activeSensors.length) ? `${config.activeSensors.length} Sensors` : 'Unconfigured';
+
+                const outputsContainer = nodeEl.querySelector('.sensor-outputs-container');
+                if (outputsContainer && config.activeSensors) {
+                    outputsContainer.innerHTML = '';
+                    if (config.activeSensors.length === 0) {
+                        outputsContainer.innerHTML = `
+                        <div class="px-3 py-2 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
+                            <span class="text-slate-500 italic">No sensors selected</span>
+                        </div>`;
+                    } else {
+                        config.activeSensors.forEach((sensor, idx) => {
+                            const isLast = idx === config.activeSensors.length - 1;
+                            const roundedClass = isLast ? 'rounded-b-xl' : '';
+                            const borderClass = isLast ? '' : 'border-b border-slate-100';
+                            const bgClass = (idx % 2 === 0) ? 'bg-slate-50/50' : 'bg-white';
+                            outputsContainer.innerHTML += `
+                                <div class="px-3 py-2.5 ${bgClass} ${borderClass} ${roundedClass} relative flex justify-between pointer-events-none">
+                                    <span class="text-slate-600 truncate pr-4">${sensor}</span>
+                                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-blue-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${currentSelectedNodeId}" data-handle="out-${sensor}" style="z-index:20;"></div>
+                                </div>
+                            `;
+                        });
+                    }
+                    setTimeout(() => { redrawAllConnections(); }, 10);
+                }
             } else if (nodeType === 'edgecommand') {
                 const prevConfig = nodesData[nodeIndex].config || {};
                 const keyEl = nodeEl.querySelector(`#${nodesData[nodeIndex].id}-display-key`);
@@ -1602,38 +1665,52 @@
             if (nodesData.length === 0) return alert("Cannot save an empty workspace.");
             if (!currentPipelineId) return alert("No active flow to save. Create one from the Flow Manager first.");
 
-            const outputKeyMap = {
-                'telemetry': () => 'sensor_value',
-                'movingaverage': () => 'moving_average',
-                'zscore': () => 'z_score',
-                'kalman': () => 'kalman_filtered',
-                'holtwinters': () => 'hw_smoothed',
-                'arima': () => 'arima_forecast',
-                'threshold': (node, handle) => handle === 'out-false' ? 'threshold_nomatch' : 'threshold_match',
-                'edgecommand': () => 'relay_status',
-                'alert': () => 'alert_sent'
-            };
+            // NEW: Recursive function to trace the wire lineage backward to the sensor
+            function resolveOutputKey(nodeId, handle) {
+                const node = nodesData.find(n => n.id === nodeId);
+                if (!node) return 'default_payload';
+
+                // Base case: We hit the telemetry node, return the sensor name
+                if (node.type === 'telemetry') return handle.replace('out-', '');
+
+                // Trace backward to the node before this one
+                const incomingConn = connections.find(c => c.toNode === nodeId && c.toHandle === 'in');
+                let baseKey = 'default_payload';
+                if (incomingConn) {
+                    baseKey = resolveOutputKey(incomingConn.fromNode, incomingConn.fromHandle);
+                }
+
+                // Append this node's action to the lineage
+                switch (node.type) {
+                    case 'movingaverage': return `${baseKey}_moving_average`;
+                    case 'zscore': return `${baseKey}_zscore`;
+                    case 'kalman': return `${baseKey}_kalman`;
+                    case 'holtwinters': return `${baseKey}_hw`;
+                    case 'arima': return `${baseKey}_arima`;
+                    case 'threshold': return handle === 'out-false' ? `${baseKey}_nomatch` : `${baseKey}_match`;
+                    default: return baseKey;
+                }
+            }
 
             const payload = {
-                pipeline_id: currentPipelineId,
-                nodes: nodesData.map(n => {
-                    const el = document.getElementById(n.id);
-                    const nodeCopy = { ...n, x: el.style.left, y: el.style.top, config: n.config || {} };
+                    pipeline_id: currentPipelineId,
+                    nodes: nodesData.map(n => {
+                        const el = document.getElementById(n.id);
+                        const nodeCopy = { ...n, x: el.style.left, y: el.style.top, config: n.config || {} };
 
-                    const incomingConn = connections.find(c => c.toNode === nodeCopy.id && c.toHandle === 'in');
-                    if (incomingConn) {
-                        const sourceNode = nodesData.find(sn => sn.id === incomingConn.fromNode);
-                        if (sourceNode && outputKeyMap[sourceNode.type]) {
-                            nodeCopy.config.input_key = outputKeyMap[sourceNode.type](sourceNode, incomingConn.fromHandle);
+                        // Resolve dynamic input_key using lineage tracing
+                        const incomingConn = connections.find(c => c.toNode === nodeCopy.id && c.toHandle === 'in');
+                        if (incomingConn) {
+                            nodeCopy.config.input_key = resolveOutputKey(incomingConn.fromNode, incomingConn.fromHandle);
                         } else {
                             nodeCopy.config.input_key = 'default_payload';
                         }
-                    }
-                    if (nodeCopy.config.inputKey) delete nodeCopy.config.inputKey;
-                    return nodeCopy;
-                }),
-                topology: connections.map(c => ({ source: c.fromNode, target: c.toNode, trigger: c.fromHandle, targetHandle: c.toHandle }))
-            };
+
+                        if (nodeCopy.config.inputKey) delete nodeCopy.config.inputKey;
+                        return nodeCopy;
+                    }),
+                    topology: connections.map(c => ({ source: c.fromNode, target: c.toNode, trigger: c.fromHandle, targetHandle: c.toHandle }))
+                };
 
             const saveBtn = document.getElementById('save-btn');
             const originalText = saveBtn.innerText;
