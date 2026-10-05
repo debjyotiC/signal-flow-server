@@ -1186,6 +1186,21 @@
                     const toHandle = e.target.getAttribute('data-handle');
 
                     if(fromNode !== toNode) {
+                        // NEW: Check if the target input already has an incoming wire
+                        const isInputOccupied = connections.some(c => c.toNode === toNode && c.toHandle === toHandle);
+
+                        // NEW: Check if the source output is already routing data somewhere else
+                        const isOutputOccupied = connections.some(c => c.fromNode === fromNode && c.fromHandle === fromHandle);
+
+                        // If either port is already in use, reject the new wire
+                        if (isInputOccupied || isOutputOccupied) {
+                            if(tempLine) tempLine.remove();
+                            isConnecting = false;
+                            connectionStartHandle = null;
+                            tempLine = null;
+                            return; // Abort connection
+                        }
+
                         const connId = `conn-${Date.now()}`;
                         connections.push({ id: connId, fromNode, fromHandle, toNode, toHandle });
                         tempLine.id = connId;
