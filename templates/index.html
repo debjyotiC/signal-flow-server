@@ -78,7 +78,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> Home
                     </a>
                     <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 rounded-md hover:bg-slate-50 transition-colors border-l-2 border-transparent">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> My Dashboards
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012-2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> My Dashboards
                     </a>
                     <a href="#" id="nav-signalflow" onclick="showFlowListView(event)" class="flex items-center gap-3 px-3 py-2 text-sm text-indigo-700 bg-indigo-50 rounded-md transition-colors mt-2 font-medium border-l-2 border-indigo-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Signal Flow
@@ -692,6 +692,7 @@
                             else actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
                         }
                     }
+                    syncNodeUI(n.id, n.type, config);
                 }
                 const idNum = parseInt(n.id.replace('node-', ''));
                 if(!isNaN(idNum) && idNum > maxId) maxId = idNum;
@@ -919,6 +920,9 @@
         // ==========================================
         // ALL NODE TEMPLATES
         // ==========================================
+                // ==========================================
+        // ALL NODE TEMPLATES
+        // ==========================================
         const nodeTemplates = {
             'telemetry': (id) => `
                 <div id="${id}" class="node-card w-72 bg-white rounded-xl shadow-md border border-slate-200 border-l-4 border-l-blue-500 cursor-move" style="z-index: 10;">
@@ -951,12 +955,10 @@
                             <button onclick="showSettingsPanel('${id}', 'edgecommand', event)" class="text-slate-300 hover:text-indigo-600 transition-colors p-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
                         </div>
                     </div>
-                    <div class="p-3 bg-slate-50/50 rounded-b-xl pointer-events-none">
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Board Key</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-key">Unconfigured</span></div>
-                            <div class="flex justify-between mt-0.5 pt-1 border-t border-slate-100"><span class="text-[10px] font-semibold text-slate-500">Channel</span><span class="text-[10px] font-bold text-fuchsia-600" id="${id}-display-channel">CH 0</span></div>
-                            <div class="flex justify-between mt-0.5 pt-1 border-t border-slate-100"><span class="text-[10px] font-semibold text-slate-500">Action</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-action">ON (1)</span></div>
-                        </div>
+                    <div class="p-3 bg-slate-50/50 rounded-b-xl pointer-events-none flex flex-col gap-1.5">
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Board Key</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-key">Unconfigured</span></div>
+                        <div class="flex justify-between mt-0.5 pt-1 border-t border-slate-100"><span class="text-[10px] font-semibold text-slate-500">Channel</span><span class="text-[10px] font-bold text-fuchsia-600" id="${id}-display-channel">CH 0</span></div>
+                        <div class="flex justify-between mt-0.5 pt-1 border-t border-slate-100"><span class="text-[10px] font-semibold text-slate-500">Action</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-action">ON (1)</span></div>
                     </div>
                 </div>`,
 
@@ -969,6 +971,10 @@
                         <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></div>
                         <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Moving Avg</h3></div>
                     </div>
+                    <div class="p-2 bg-slate-50/50 rounded-b-xl pointer-events-none border-t border-slate-100 flex flex-col gap-1">
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Type</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-type">SMA</span></div>
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Window</span><span class="text-[10px] font-bold text-cyan-600" id="${id}-display-window">10</span></div>
+                    </div>
                     <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
                 </div>`,
 
@@ -977,11 +983,15 @@
                     <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                     <button onclick="showSettingsPanel('${id}', 'zscore', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
                     <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
                         <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div>
                         <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Z-Score Anomaly</h3></div>
                     </div>
-                    <div class="flex flex-col text-[11px] font-semibold">
+                    <div class="p-2 bg-slate-50/50 pointer-events-none border-t border-slate-100 flex flex-col gap-1">
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Window</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-window">30</span></div>
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Threshold</span><span class="text-[10px] font-bold text-purple-600" id="${id}-display-threshold">2.5 σ</span></div>
+                    </div>
+                    <div class="flex flex-col text-[11px] font-semibold border-t border-slate-100">
                         <div class="px-3 py-2.5 border-b border-slate-100 relative flex justify-between pointer-events-none">
                             <span class="text-red-500">True (Anomaly)</span>
                             <div class="connection-handle handle-out w-3.5 h-3.5 bg-red-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
@@ -998,18 +1008,18 @@
                     <button onclick="deleteNode('${id}', event)" class="absolute top-2.5 right-8 text-slate-300 hover:text-red-500 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                     <button onclick="showSettingsPanel('${id}', 'threshold', event)" class="absolute top-2.5 right-2 text-slate-300 hover:text-indigo-600 transition-colors z-50 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
                     <div class="connection-handle handle-in w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -left-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="in"></div>
-                    <div class="p-3 border-b border-slate-100 flex items-center gap-3 pointer-events-none">
+                    <div class="p-3 flex items-center gap-3 pointer-events-none">
                         <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg></div>
                         <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Threshold</h3></div>
                     </div>
-                    <div class="flex flex-col text-[11px] font-semibold">
-                        <div class="px-3 py-2.5 border-b border-slate-100 relative flex justify-between pointer-events-none">
+                    <div class="p-2 bg-slate-50/50 pointer-events-none border-t border-slate-100 flex justify-between items-center">
+                        <span class="text-[10px] font-semibold text-slate-500">Condition</span>
+                        <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100" id="${id}-display-condition">> 50</span>
+                    </div>
+                    <div class="flex flex-col text-[11px] font-semibold border-t border-slate-100">
+                        <div class="px-3 py-2.5 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
                             <span class="text-amber-600">True (Match)</span>
                             <div class="connection-handle handle-out w-3.5 h-3.5 bg-amber-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-true" style="z-index:20;"></div>
-                        </div>
-                        <div class="px-3 py-2.5 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
-                            <span class="text-slate-600">Pass through (No Match)</span>
-                            <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${id}" data-handle="out-false" style="z-index:20;"></div>
                         </div>
                     </div>
                 </div>`,
@@ -1023,6 +1033,10 @@
                         <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center border border-green-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg></div>
                         <div><h3 class="text-sm font-bold text-slate-800 leading-tight">ARIMA Forecast</h3></div>
                     </div>
+                    <div class="p-2 bg-slate-50/50 rounded-b-xl pointer-events-none border-t border-slate-100 flex flex-col gap-1">
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Order (p,d,q)</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-order">(4,1,5)</span></div>
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Horizon</span><span class="text-[10px] font-bold text-green-600" id="${id}-display-horizon">10 steps</span></div>
+                    </div>
                     <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
                 </div>`,
 
@@ -1034,6 +1048,10 @@
                     <div class="p-3 flex items-center gap-3 pointer-events-none">
                         <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></div>
                         <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Kalman Filter</h3></div>
+                    </div>
+                    <div class="p-2 bg-slate-50/50 rounded-b-xl pointer-events-none border-t border-slate-100 flex flex-col gap-1">
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Q (Process)</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-q">0.01</span></div>
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">R (Measure)</span><span class="text-[10px] font-bold text-orange-600" id="${id}-display-r">1.0</span></div>
                     </div>
                     <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
                 </div>`,
@@ -1047,6 +1065,10 @@
                         <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg></div>
                         <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Holt-Winters</h3></div>
                     </div>
+                    <div class="p-2 bg-slate-50/50 rounded-b-xl pointer-events-none border-t border-slate-100 flex flex-col gap-1">
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">α, β, γ</span><span class="text-[10px] font-bold text-slate-800" id="${id}-display-params">0.2, 0.1, 0.3</span></div>
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Period (L)</span><span class="text-[10px] font-bold text-teal-600" id="${id}-display-period">12</span></div>
+                    </div>
                     <div class="connection-handle handle-out w-3.5 h-3.5 bg-slate-300 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm" data-node="${id}" data-handle="out"></div>
                 </div>`,
 
@@ -1059,8 +1081,93 @@
                         <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center border border-red-100"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
                         <div><h3 class="text-sm font-bold text-slate-800 leading-tight">Send Alert</h3></div>
                     </div>
+                    <div class="p-2 bg-slate-50/50 rounded-b-xl pointer-events-none border-t border-slate-100 flex flex-col gap-1">
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">Type</span><span class="text-[10px] font-bold text-slate-800 truncate max-w-[100px] text-right" id="${id}-display-type">Email</span></div>
+                        <div class="flex justify-between"><span class="text-[10px] font-semibold text-slate-500">To</span><span class="text-[10px] font-bold text-red-600 truncate max-w-[100px] text-right" id="${id}-display-target">example@email.com</span></div>
+                    </div>
                 </div>`
         };
+
+                function syncNodeUI(nodeId, nodeType, config) {
+            const nodeEl = document.getElementById(nodeId);
+            if (!nodeEl) return;
+
+            if (nodeType === 'telemetry') {
+                const titleEl = nodeEl.querySelector('.node-title');
+                const subtitleEl = nodeEl.querySelector('.node-subtitle');
+                if (titleEl) titleEl.innerText = config.targetHardware || 'Data Source';
+                if (subtitleEl) subtitleEl.innerText = (config.activeSensors && config.activeSensors.length) ? `${config.activeSensors.length} Sensors` : 'Unconfigured';
+
+                const outputsContainer = nodeEl.querySelector('.sensor-outputs-container');
+                if (outputsContainer && config.activeSensors) {
+                    outputsContainer.innerHTML = '';
+                    if (config.activeSensors.length === 0) {
+                        outputsContainer.innerHTML = `
+                        <div class="px-3 py-2 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
+                            <span class="text-slate-500 italic">No sensors selected</span>
+                        </div>`;
+                    } else {
+                        config.activeSensors.forEach((sensor, idx) => {
+                            const isLast = idx === config.activeSensors.length - 1;
+                            const roundedClass = isLast ? 'rounded-b-xl' : '';
+                            const borderClass = isLast ? '' : 'border-b border-slate-100';
+                            const bgClass = (idx % 2 === 0) ? 'bg-slate-50/50' : 'bg-white';
+                            outputsContainer.innerHTML += `
+                                <div class="px-3 py-2.5 ${bgClass} ${borderClass} ${roundedClass} relative flex justify-between pointer-events-none">
+                                    <span class="text-slate-600 truncate pr-4">${sensor}</span>
+                                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-blue-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${nodeId}" data-handle="out-${sensor}" style="z-index:20;"></div>
+                                </div>
+                            `;
+                        });
+                    }
+                    setTimeout(() => { redrawAllConnections(); }, 10);
+                }
+            } else if (nodeType === 'edgecommand') {
+                const keyEl = nodeEl.querySelector(`#${nodeId}-display-key`);
+                const chEl = nodeEl.querySelector(`#${nodeId}-display-channel`);
+                const actEl = nodeEl.querySelector(`#${nodeId}-display-action`);
+                if (keyEl) keyEl.innerText = config.boardKey ? config.boardKey : 'Unconfigured';
+                if (chEl) chEl.innerText = `CH ${config.channel || '0'}`;
+                if (actEl) {
+                    if (config.actionType === 'Value') actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
+                    else actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
+                }
+            } else if (nodeType === 'movingaverage') {
+                const typeEl = nodeEl.querySelector(`#${nodeId}-display-type`);
+                const winEl = nodeEl.querySelector(`#${nodeId}-display-window`);
+                if (typeEl) typeEl.innerText = config.avgType ? config.avgType.split(' ')[0] : 'SMA';
+                if (winEl) winEl.innerText = config.windowSize || '10';
+            } else if (nodeType === 'zscore') {
+                const winEl = nodeEl.querySelector(`#${nodeId}-display-window`);
+                const threshEl = nodeEl.querySelector(`#${nodeId}-display-threshold`);
+                if (winEl) winEl.innerText = config.windowSize || '30';
+                if (threshEl) threshEl.innerText = (config.threshold || '2.5') + ' σ';
+            } else if (nodeType === 'threshold') {
+                const condEl = nodeEl.querySelector(`#${nodeId}-display-condition`);
+                if (condEl) condEl.innerText = `${config.operator || '>'} ${config.value || '50'}`;
+            } else if (nodeType === 'alert') {
+                const typeEl = nodeEl.querySelector(`#${nodeId}-display-type`);
+                const targetEl = nodeEl.querySelector(`#${nodeId}-display-target`);
+                if (typeEl) typeEl.innerText = config.actionType ? config.actionType.split(' ')[0] : 'Email';
+                if (targetEl) targetEl.innerText = config.recipient || 'example@email.com';
+            } else if (nodeType === 'arima') {
+                const orderEl = nodeEl.querySelector(`#${nodeId}-display-order`);
+                const horizEl = nodeEl.querySelector(`#${nodeId}-display-horizon`);
+                if (orderEl) orderEl.innerText = `(${config.p || 4},${config.d || 1},${config.q || 5})`;
+                if (horizEl) horizEl.innerText = `${config.horizon || 10} steps`;
+            } else if (nodeType === 'kalman') {
+                const qEl = nodeEl.querySelector(`#${nodeId}-display-q`);
+                const rEl = nodeEl.querySelector(`#${nodeId}-display-r`);
+                if (qEl) qEl.innerText = config.q || '0.01';
+                if (rEl) rEl.innerText = config.r || '1.0';
+            } else if (nodeType === 'holtwinters') {
+                const paramsEl = nodeEl.querySelector(`#${nodeId}-display-params`);
+                const periodEl = nodeEl.querySelector(`#${nodeId}-display-period`);
+                if (paramsEl) paramsEl.innerText = `${config.alpha || 0.2}, ${config.beta || 0.1}, ${config.gamma || 0.3}`;
+                if (periodEl) periodEl.innerText = config.period || '12';
+            }
+        }
+
 
         function instantiateNode(type, x, y, forcedId = null) {
             const nodeId = forcedId || `node-${nodeIdCounter++}`;
@@ -1604,53 +1711,17 @@
                 config.activeSensors = activeSensors;
             }
 
+            const prevConfig = nodesData[nodeIndex].config || {};
             nodesData[nodeIndex].config = config;
 
             const nodeEl = document.getElementById(currentSelectedNodeId);
             const nodeType = nodesData[nodeIndex].type;
 
-            if (nodeType === 'telemetry') {
-                const titleEl = nodeEl.querySelector('.node-title');
-                const subtitleEl = nodeEl.querySelector('.node-subtitle');
-                if (titleEl) titleEl.innerText = config.targetHardware || 'Data Source';
-                if (subtitleEl) subtitleEl.innerText = (config.activeSensors && config.activeSensors.length) ? `${config.activeSensors.length} Sensors` : 'Unconfigured';
+            // USE THE NEW HELPER
+            syncNodeUI(currentSelectedNodeId, nodeType, config);
 
-                const outputsContainer = nodeEl.querySelector('.sensor-outputs-container');
-                if (outputsContainer && config.activeSensors) {
-                    outputsContainer.innerHTML = '';
-                    if (config.activeSensors.length === 0) {
-                        outputsContainer.innerHTML = `
-                        <div class="px-3 py-2 bg-slate-50/50 rounded-b-xl relative flex justify-between pointer-events-none">
-                            <span class="text-slate-500 italic">No sensors selected</span>
-                        </div>`;
-                    } else {
-                        config.activeSensors.forEach((sensor, idx) => {
-                            const isLast = idx === config.activeSensors.length - 1;
-                            const roundedClass = isLast ? 'rounded-b-xl' : '';
-                            const borderClass = isLast ? '' : 'border-b border-slate-100';
-                            const bgClass = (idx % 2 === 0) ? 'bg-slate-50/50' : 'bg-white';
-                            outputsContainer.innerHTML += `
-                                <div class="px-3 py-2.5 ${bgClass} ${borderClass} ${roundedClass} relative flex justify-between pointer-events-none">
-                                    <span class="text-slate-600 truncate pr-4">${sensor}</span>
-                                    <div class="connection-handle handle-out w-3.5 h-3.5 bg-blue-400 border-2 border-white rounded-full absolute -right-1.5 top-1/2 -translate-y-1/2 shadow-sm pointer-events-auto" data-node="${currentSelectedNodeId}" data-handle="out-${sensor}" style="z-index:20;"></div>
-                                </div>
-                            `;
-                        });
-                    }
-                    setTimeout(() => { redrawAllConnections(); }, 10);
-                }
-            } else if (nodeType === 'edgecommand') {
-                const prevConfig = nodesData[nodeIndex].config || {};
-                const keyEl = nodeEl.querySelector(`#${nodesData[nodeIndex].id}-display-key`);
-                const chEl = nodeEl.querySelector(`#${nodesData[nodeIndex].id}-display-channel`);
-                const actEl = nodeEl.querySelector(`#${nodesData[nodeIndex].id}-display-action`);
-                if (keyEl) keyEl.innerText = config.boardKey ? config.boardKey : 'Unconfigured';
-                if (chEl) chEl.innerText = `CH ${config.channel || '0'}`;
-                if (actEl) {
-                    if (config.actionType === 'Value') actEl.innerText = config.actionValue ? `Val: ${config.actionValue}` : 'Val: -';
-                    else actEl.innerText = config.actionBoolean === '0' ? 'OFF (0)' : 'ON (1)';
-                }
-
+            // Keep the edgecommand API call specifically for applying settings
+            if (nodeType === 'edgecommand') {
                 if (config.boardKey && config.channel) {
                     fetch('/api/v1/hardware/channels/take', {
                         method: 'POST',
@@ -1702,7 +1773,7 @@
                     case 'kalman': return `${baseKey}_kalman`;
                     case 'holtwinters': return `${baseKey}_hw`;
                     case 'arima': return `${baseKey}_arima`;
-                    case 'threshold': return handle === 'out-false' ? `${baseKey}_nomatch` : `${baseKey}_match`;
+                    case 'threshold': return `${baseKey}_match`;
                     default: return baseKey;
                 }
             }
