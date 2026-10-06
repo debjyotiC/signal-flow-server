@@ -55,10 +55,6 @@
             stroke: #10b981 !important;
             stroke-width: 3px !important;
         }
-
-        /* Terminal Log Scrollbar */
-        #logs-terminal-output::-webkit-scrollbar-thumb { background: #4b5563; }
-        #logs-terminal-output::-webkit-scrollbar-thumb:hover { background-color: #6b7280; }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex font-sans text-slate-800 bg-[#f8f9fc]">
@@ -298,24 +294,24 @@
     </div>
 
     <!-- TERMINAL LOGS MODAL -->
-    <div id="logs-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden pointer-events-auto">
-        <div class="bg-gray-900 rounded-xl shadow-2xl w-[800px] max-w-[95vw] h-[550px] max-h-[85vh] flex flex-col relative overflow-hidden transform scale-95 transition-transform duration-200 border border-gray-700" id="logs-content-box">
-            <div class="px-4 py-3 border-b border-gray-800 flex justify-between items-center bg-gray-950 shrink-0">
-                <div class="flex items-center gap-2 text-gray-300 font-mono text-sm">
-                    <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Flow Logs <span class="text-gray-600 text-xs ml-2" id="logs-flow-id-display"></span>
+    <div id="logs-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm hidden pointer-events-auto">
+        <div class="bg-white rounded-2xl shadow-2xl w-[800px] max-w-[95vw] h-[550px] max-h-[85vh] flex flex-col relative overflow-hidden transform scale-95 transition-transform duration-200" id="logs-content-box">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+                <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Flow Logs <span class="text-slate-400 font-normal text-sm ml-2" id="logs-flow-id-display"></span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" id="logs-status-indicator"></span>
-                        <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider" id="logs-status-text">Connected</span>
+                    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="logs-status-indicator"></span>
+                        <span class="text-[10px] uppercase text-emerald-700 font-bold tracking-wider" id="logs-status-text">Connected</span>
                     </div>
-                    <button onclick="closeLogsModal()" class="text-gray-500 hover:text-white transition-colors">
+                    <button onclick="closeLogsModal()" class="text-slate-400 hover:text-slate-600 transition-colors p-1 hover:bg-slate-200 rounded-md">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
             </div>
-            <div id="logs-terminal-output" class="flex-1 p-4 overflow-y-auto font-mono text-xs text-green-400 whitespace-pre-wrap flex flex-col gap-1.5 bg-gray-900">
+            <div id="logs-terminal-output" class="flex-1 p-6 overflow-y-auto font-mono text-sm text-slate-700 whitespace-pre-wrap flex flex-col gap-2 bg-[#f8f9fc] shadow-inner">
                 <!-- Logs will be populated here -->
             </div>
         </div>
@@ -741,7 +737,7 @@
             setTimeout(() => { content.classList.replace('scale-95', 'scale-100'); }, 10);
 
             const terminal = document.getElementById('logs-terminal-output');
-            terminal.innerHTML = `<div class="text-gray-500 animate-pulse">> Connecting to log server for flow: ${currentPipelineId}...</div>`;
+            terminal.innerHTML = `<div class="text-slate-500 animate-pulse">> Connecting to log server for flow: ${currentPipelineId}...</div>`;
 
             // Initial fetch
             fetchLogs();
@@ -821,7 +817,7 @@
             }
 
             if (!logsArray || logsArray.length === 0) {
-                terminal.innerHTML = '<div class="text-gray-600 italic">> No logs available for this flow yet.</div>';
+                terminal.innerHTML = '<div class="text-slate-500 italic">> No logs available for this flow yet.</div>';
                 return;
             }
 
@@ -833,11 +829,11 @@
                     const level = (log.detection_level || 'info').toUpperCase();
                     let levelHtml = '';
 
-                    if (level === 'INFO') levelHtml = '<span class="text-blue-400 font-bold">[INFO]</span>';
-                    else if (level === 'WARN') levelHtml = '<span class="text-amber-400 font-bold">[WARN]</span>';
-                    else if (level === 'ERROR') levelHtml = '<span class="text-red-500 font-bold">[ERROR]</span>';
-                    else if (level === 'SYS') levelHtml = '<span class="text-purple-400 font-bold">[SYS]</span>';
-                    else levelHtml = `<span class="text-gray-400 font-bold">[${level}]</span>`;
+                    if (level === 'INFO') levelHtml = '<span class="text-blue-600 font-bold">[INFO]</span>';
+                    else if (level === 'WARN') levelHtml = '<span class="text-amber-600 font-bold">[WARN]</span>';
+                    else if (level === 'ERROR') levelHtml = '<span class="text-red-600 font-bold">[ERROR]</span>';
+                    else if (level === 'SYS') levelHtml = '<span class="text-purple-600 font-bold">[SYS]</span>';
+                    else levelHtml = `<span class="text-slate-500 font-bold">[${level}]</span>`;
 
                     // Parse timestamp (Assuming nanoseconds, convert to milliseconds)
                     let timeStr = log.timestamp;
@@ -851,17 +847,17 @@
                     }
 
                     // Add node indicator if available
-                    const nodeTag = log.node ? ` <span class="text-indigo-400 font-semibold">[${log.node}]</span>` : '';
+                    const nodeTag = log.node ? ` <span class="text-indigo-600 font-semibold">[${log.node}]</span>` : '';
 
                     line.innerHTML = `> [${timeStr}] ${levelHtml}${nodeTag} ${log.message}`;
                 }
                 // Fallback for local simulated strings
                 else {
                     let formattedLog = log;
-                    if(log.includes('[INFO]')) formattedLog = log.replace('[INFO]', '<span class="text-blue-400 font-bold">[INFO]</span>');
-                    if(log.includes('[WARN]')) formattedLog = log.replace('[WARN]', '<span class="text-amber-400 font-bold">[WARN]</span>');
-                    if(log.includes('[ERROR]')) formattedLog = log.replace('[ERROR]', '<span class="text-red-500 font-bold">[ERROR]</span>');
-                    if(log.includes('[SYS]')) formattedLog = log.replace('[SYS]', '<span class="text-purple-400 font-bold">[SYS]</span>');
+                    if(log.includes('[INFO]')) formattedLog = log.replace('[INFO]', '<span class="text-blue-600 font-bold">[INFO]</span>');
+                    if(log.includes('[WARN]')) formattedLog = log.replace('[WARN]', '<span class="text-amber-600 font-bold">[WARN]</span>');
+                    if(log.includes('[ERROR]')) formattedLog = log.replace('[ERROR]', '<span class="text-red-600 font-bold">[ERROR]</span>');
+                    if(log.includes('[SYS]')) formattedLog = log.replace('[SYS]', '<span class="text-purple-600 font-bold">[SYS]</span>');
 
                     line.innerHTML = `> ${formattedLog}`;
                 }
